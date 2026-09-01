@@ -24,7 +24,7 @@
 </style>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<meta http-equiv='Cache-Control' content='no-cache, no-store, must-revalidate'><meta http-equiv='Pragma' content='no-cache'><meta http-equiv='Expires' content='0'><title>Story Director V30.2 FINAL - Full 11 Voices - Same UI + 1.25x Fix</title>
+<meta http-equiv='Cache-Control' content='no-cache, no-store, must-revalidate'><meta http-equiv='Pragma' content='no-cache'><meta http-equiv='Expires' content='0'><title>Story Director V30.3 FINAL - Full 11 Voices - Same UI + 1.25x Fix</title>
 <script src="https://cdn.tailwindcss.com"></script>
 <style>
 body{background:#120c26;color:#e9e4ff;max-width:600px;margin:auto;font-family:Inter,system-ui}
@@ -59,7 +59,7 @@ button, [onclick] { pointer-events: auto !important; touch-action: manipulation 
 </style>
 </head>
 <body class="pb-32">
-<header class="p-4 bg-[#0e091e] flex justify-between items-center sticky top-0 z-30"><div><h1 class="font-black text-[18px]">Story Director V30.2 FINAL 🎬 11 Voices</h1><p class="text-[9px] text-[#a78bfa]">V28.9 FINAL - Female Fixed + Mixed Narrator + Emotion Fix + 11 Voices</p></div><div class="flex gap-2"><button onclick="toggleApiBox()" class="bg-[#241a3f] border border-[#3d2f68] text-white px-3 py-2 rounded-full text-[10px] font-black">⚙️ API</button><span class="bg-gradient-to-r from-purple-500 to-pink-500 text-white px-2 py-1 rounded-full text-[8px] font-black h-fit self-center">V28.9 FINAL</span></div></header>
+<header class="p-4 bg-[#0e091e] flex justify-between items-center sticky top-0 z-30"><div><h1 class="font-black text-[18px]">Story Director V30.3 FINAL 🎬 11 Voices</h1><p class="text-[9px] text-[#a78bfa]">V28.9 FINAL - Female Fixed + Mixed Narrator + Emotion Fix + 11 Voices</p></div><div class="flex gap-2"><button onclick="toggleApiBox()" class="bg-[#241a3f] border border-[#3d2f68] text-white px-3 py-2 rounded-full text-[10px] font-black">⚙️ API</button><span class="bg-gradient-to-r from-purple-500 to-pink-500 text-white px-2 py-1 rounded-full text-[8px] font-black h-fit self-center">V28.9 FINAL</span></div></header>
 <div id="apiBox" class="hidden p-3"><div class="card p-3 border-2 border-yellow-400 bg-[#1a1230]"><p class="text-[11px] font-black flex justify-between"><span>🔑 OpenAI Key</span><button onclick="toggleApiBox()" class="bg-black text-white rounded-full px-2 py-1 text-[8px]">✕ HIDE</button></p><input id="openaiKey" type="password" placeholder="sk-... paste once - saved forever" class="input-dark w-full mt-2 p-3 text-[11px]"><p id="apiStatus" class="text-[7px] mt-1 text-green-400"></p></div></div>
 <div class="flex justify-around p-3 bg-[#120c26] sticky top-[64px] z-20 border-b border-[#3d2f68] text-[11px] font-bold">
 <button onclick="setTab('ai')" id="tab-ai" class="tab-active pb-2">✨ AI Story</button>
@@ -75,7 +75,7 @@ button, [onclick] { pointer-events: auto !important; touch-action: manipulation 
 राम (डाँटते हुए) "तुम्हारा दिमाग़ ख़राब है क्या?"
 मोहन (हँसते हुए) "अस्सी घाट पर भौकाल देखो!"</textarea><div class="grid grid-cols-2 gap-2 mt-3"><button onclick="sendPasteToDirector()" class="btn-primary py-3 font-black text-[11px]">🎭 SEND TO DIRECTOR - Auto Emotion</button><button onclick="clearPaste()" class="btn-ghost py-3 text-[10px] font-black">🗑 CLEAR ALL</button></div></div></div>
 <div id="view-director" class="hidden p-3 space-y-3"><div class="card p-3 border-2 border-purple-500"><h3 class="font-black text-[13px]">🎭 Smart Director V18.9 - Auto Emotion + Narrator</h3><p class="text-[7px] text-[#a78bfa] mt-1 bg-black p-2 rounded">Smart auto emotions - Tap ✏️ to edit any - Manual speaker add available</p><div class="mt-3 bg-black/40 rounded-[12px] p-3 border border-[#3d2f68]"><p class="text-[9px] font-black text-[#a78bfa]">➕ ADD SPEAKERS MANUALLY</p><div class="flex gap-2 mt-2"><input id="newSpeakerName" placeholder="राम, सीता, मोहन" class="input-dark flex-1 p-2.5 text-[11px]"><button onclick="addSpeakerManual()" class="btn-primary px-5 py-2.5 text-[10px] font-black">+ ADD</button></div></div><button onclick="autoDetect()" class="btn-primary w-full mt-3 py-3 font-black text-[11px]">🤖 AUTO DETECT + SMART EMOTION ASSIGN</button><div id="directorResult" class="mt-2 text-[8px] bg-black p-2 rounded hidden"></div><div id="speakerList" class="mt-3 space-y-3"></div><button onclick="convertForVoice()" class="btn-primary w-full mt-4 py-4 font-black text-[11px]">🔊 CONVERT FOR VOICE STUDIO →</button><div class="grid grid-cols-2 gap-2 mt-3"><button onclick="clearDirector()" class="btn-ghost py-3 text-[10px] font-black">🗑 CLEAR ALL</button><button onclick="resetDirector()" class="btn-ghost py-3 text-[10px] font-black">↺ Reset Director</button></div></div><div id="scriptList" class="space-y-3"></div><div class="card p-2 flex gap-2 mt-2"><button onclick="clearScript()" class="btn-ghost flex-1 py-2 text-[8px]">Clear Script Only</button><button onclick="clearDirectorAll()" class="btn-ghost flex-1 py-2 text-[8px]">🗑 CLEAR ENTIRE PAGE</button></div></div>
-<div id="view-voice" class="hidden p-3 space-y-3"><div class="card p-3 border border-purple-500"><h3 class="font-black text-purple-300 text-[13px]">🎙 Voice Studio V18.5 + 1.25x Fix</h3><p id="playStatus" class="text-[8px] bg-black p-2 rounded mt-2">Ready - Smart emotions applied</p><div class="w-full bg-white/20 rounded-full h-[6px] mt-2"><div id="progressBar" class="bg-green-400 h-full" style="width:0%"></div></div><div class="grid grid-cols-3 gap-2 mt-3"><button id="playFullBtn" class="btn-primary col-span-2 py-3 text-[10px] font-black">▶ GENERATE ALL</button><button id="stopBtn" class="btn-stop py-3 text-[10px] font-black">⏹ STOP</button></div><div id="audioBox" class="mt-3 audio-scroll bg-[#0e091e] border border-[#3d2f68] rounded-[16px] p-2"><div id="audioPlayers" class="space-y-2"></div></div><div id="masterBox" class="hidden mt-3"><div class="card p-3 bg-gradient-to-br from-[#2a1f4a] to-[#1e1638] border-2 border-purple-500"><audio id="masterAudio" controls class="w-full rounded-[12px]"></audio><div class="flex gap-2 mt-3 items-center"><label class="text-[10px] font-black whitespace-nowrap">Preview:</label><select id="previewSpeed" class="input-dark px-2 py-2 text-[10px] rounded-full flex-1"><option value="1">1.0x - Original</option><option value="1.05">1.05x - Slight Fast</option><option value="1.10" selected>1.10x - Natural ⭐</option><option value="1.15">1.15x - Expressive</option><option value="1.20">1.20x - Crisp</option></select></div><div class="flex gap-2 mt-2 items-center"><label class="text-[10px] font-black whitespace-nowrap">Download:</label><select id="downloadSpeed" class="input-dark px-2 py-2 text-[11px] rounded-full flex-1"><option value="1">1.0x - Original</option><option value="1.05">1.05x - Slight Fast</option><option value="1.10" selected>1.10x - Natural ⭐</option><option value="1.15">1.15x - Expressive</option><option value="1.20">1.20x - Crisp</option></select></div><a id="masterDl" href="#" download="story_V18_5_final.mp3" class="btn-ghost w-full mt-3 py-3 text-center block font-black text-[10px]">⬇️ DOWNLOAD 1.00x (MP3 Original)</a><button id="masterDlFast" onclick="downloadAtSpeed()" class="btn-primary w-full mt-2 py-4 text-center block font-black text-[12px]">⬇️ DOWNLOAD AT 1.25x (WAV - Fast)</button><p id="dlStatus" class="text-[8px] mt-2 text-center text-[#a78bfa]"></p></div></div><div class="grid grid-cols-3 gap-2 mt-3"><button onclick="clearVoice()" class="btn-ghost py-2.5 text-[9px] font-black">🗑 CLEAR ALL</button><button onclick="resetVoice()" class="btn-ghost py-2.5 text-[9px] font-black">↺ Reset Voice</button><button onclick="clearAudioOnly()" class="btn-ghost py-2.5 text-[9px] font-black">Clear Audio Only</button></div></div></div>
+<div id="view-voice" class="hidden p-3 space-y-3"><div class="card p-3 border border-purple-500"><h3 class="font-black text-purple-300 text-[13px]">🎙 Voice Studio V18.5 + 1.25x Fix</h3><p id="playStatus" class="text-[8px] bg-black p-2 rounded mt-2">Ready - Smart emotions applied</p><div class="w-full bg-white/20 rounded-full h-[6px] mt-2"><div id="progressBar" class="bg-green-400 h-full" style="width:0%"></div></div><div class="grid grid-cols-3 gap-2 mt-3"><button id="playFullBtn" class="btn-primary col-span-2 py-3 text-[10px] font-black">▶ GENERATE ALL</button><button id="stopBtn" class="btn-stop py-3 text-[10px] font-black">⏹ STOP</button></div><div id="audioBox" class="mt-3 audio-scroll bg-[#0e091e] border border-[#3d2f68] rounded-[16px] p-2"><div id="audioPlayers" class="space-y-2"></div></div><div id="masterBox" class="hidden mt-3"><div class="card p-3 bg-gradient-to-br from-[#2a1f4a] to-[#1e1638] border-2 border-purple-500"><audio id="masterAudio" controls class="w-full rounded-[12px]"></audio><div class="flex gap-2 mt-3 items-center"><label class="text-[10px] font-black whitespace-nowrap">Preview:</label><select id="previewSpeed" class="input-dark px-2 py-2 text-[10px] rounded-full flex-1"><option value="1">1.0x</option><option value="1.05">1.05x</option><option value="1.10" selected>1.10x Natural ⭐</option><option value="1.15">1.15x</option><option value="1.20">1.20x</option></select></div><div class="flex gap-2 mt-2 items-center"><label class="text-[10px] font-black whitespace-nowrap">Download:</label><select id="downloadSpeed" class="input-dark px-2 py-2 text-[11px] rounded-full flex-1"><option value="1">1.0x</option><option value="1.05">1.05x</option><option value="1.10" selected>1.10x Natural ⭐</option><option value="1.15">1.15x</option><option value="1.20">1.20x</option></select></div><a id="masterDl" href="#" download="story_V18_5_final.mp3" class="btn-ghost w-full mt-3 py-3 text-center block font-black text-[10px]">⬇️ DOWNLOAD 1.00x (MP3 Original)</a><button id="masterDlFast" onclick="downloadAtSpeed()" class="btn-primary w-full mt-2 py-4 text-center block font-black text-[12px]">⬇️ DOWNLOAD AT 1.25x (WAV - Fast)</button><p id="dlStatus" class="text-[8px] mt-2 text-center text-[#a78bfa]"></p></div></div><div class="grid grid-cols-3 gap-2 mt-3"><button onclick="clearVoice()" class="btn-ghost py-2.5 text-[9px] font-black">🗑 CLEAR ALL</button><button onclick="resetVoice()" class="btn-ghost py-2.5 text-[9px] font-black">↺ Reset Voice</button><button onclick="clearAudioOnly()" class="btn-ghost py-2.5 text-[9px] font-black">Clear Audio Only</button></div></div></div>
 <script>
 let tab='ai', cloudVoices=[], currentScript=[], speakers=[], speakerVoiceMap={}, speakerGenderMap={}, speakerIntensityMap={}, audioBlobs=[], audioUrls=[], masterUrl=null, isPlaying=false, stopRequested=false, storyMemory='', editingIdx=-1;
 const VOICES=[
@@ -259,7 +259,7 @@ function saveEdit(i){ let sel=document.getElementById(`dir-${i}`); if(sel) curre
 function convertForVoice(){ if(!currentScript.length){alert('Detect first'); return;} setTab('voice'); document.getElementById('playStatus').textContent=`Ready - ${currentScript.length} lines, ${speakers.length} speakers`; }
 function buildInstruction(speaker, direction){ let intensity=speakerIntensityMap[speaker]||70; return `Speak as ${speaker} in Hindi, emotion: ${direction}, intensity ${intensity}%. Natural Banarasi accent, expressive.`; }
 async function playLine(i,save=true){
- let s=currentScript[i]; let voiceId=getDistinctVoiceForSpeaker(s.speaker); let text=s.dialogue; let instruction=buildInstruction(s.speaker, s.direction);
+ let s=currentScript[i]; let voiceId=getVoiceToPlay(s.speaker); let text=s.dialogue; let instruction=buildInstruction(s.speaker, s.direction);
  let key=getKey(); if(!key){toggleApiBox(); throw new Error('no key');}
  let body={model:'gpt-4o-mini-tts', voice:voiceId, input:text, instructions:instruction};
  let r=await fetch('https://api.openai.com/v1/audio/speech',{method:'POST',headers:{'Authorization':'Bearer '+key,'Content-Type':'application/json'},body:JSON.stringify(body)});
@@ -298,7 +298,7 @@ function testSpeaker(sp){
 async function playLinePreview(i){
   try{
     let s=currentScript[i];
-    let voiceId=getDistinctVoiceForSpeaker(s.speaker);
+    let voiceId=getVoiceToPlay(s.speaker);
     let instruction=buildInstruction(s.speaker, s.direction);
     let key=getKey(); if(!key){toggleApiBox(); alert('Add API key first'); return;}
     let status=document.getElementById('directorResult');
@@ -354,68 +354,73 @@ document.getElementById('downloadSpeed').addEventListener('change', ()=>{ let b=
 
 <script>
 
-// V30.2 VOICE FULL FREEDOM - FEMALE BALLAD BUG FIXED FOREVER
-window._userVoiceChoice = window._userVoiceChoice || {};
-const ALL_VOICES = [
-  {id:'alloy', label:'Alloy ○ MALE - Warm Balanced'},
-  {id:'ash', label:'Ash ⛰️ MALE - Deep Cinematic'},
-  {id:'onyx', label:'Onyx 🗿 NARRATOR - Deep Storyteller'},
-  {id:'echo', label:'Echo 🔊 MALE - Resonant'},
-  {id:'fable', label:'Fable 📖 MALE - Expressive'},
-  {id:'ballad', label:'Ballad 🎵 MALE - Melodic (male)'},
-  {id:'shimmer', label:'Shimmer ♡ FEMALE - Soft Romantic (BEST FEMALE)'},
-  {id:'coral', label:'Coral 🌊 FEMALE - Warm Friendly'},
-  {id:'nova', label:'Nova ⭐ FEMALE - Bright Energetic'},
-  {id:'sage', label:'Sage 🌿 FEMALE - Wise Calm'},
-  {id:'alloy_f', label:'Alloy ♀ FEMALE - Neutral'}
-];
-const DISTINCT_DEFAULT = {
-  'राम':'alloy','सीता':'shimmer','मोहन':'ash','Narrator':'onyx',
-  'प्रिया':'shimmer','गुजेश':'alloy','रजनी':'coral','रूनी':'nova','मधु':'sage','अमित':'echo','श्याम':'fable'
-};
-function getInitialVoice(speaker, gender){
-  if(DISTINCT_DEFAULT[speaker]) return DISTINCT_DEFAULT[speaker];
-  if(gender==='female') return 'shimmer';
-  if(gender==='narrator') return 'onyx';
+// V30.3 TRUE VOICE FREEDOM - FIXES PLAYBACK IGNORING DROPDOWN
+window._userChoice = window._userChoice || {};
+const DEFAULT_MAP = {'राम':'alloy','सीता':'shimmer','मोहन':'ash','Narrator':'onyx','प्रिया':'shimmer','गुजेश':'alloy','रजनी':'coral','रूनी':'nova','मधु':'sage'};
+
+function getVoiceToPlay(speaker){
+  // 1. User's explicit choice in Voice Studio (highest priority)
+  if(window._userChoice[speaker]) return window._userChoice[speaker];
+  // 2. SpeakerVoiceMap (set by dropdown)
+  if(typeof speakerVoiceMap !== 'undefined' && speakerVoiceMap[speaker]) return speakerVoiceMap[speaker];
+  // 3. Default distinct
+  if(DEFAULT_MAP[speaker]) return DEFAULT_MAP[speaker];
+  // 4. Gender fallback - FEMALE = shimmer NOT ballad
+  if(typeof speakerGenderMap !== 'undefined'){
+    let g = speakerGenderMap[speaker];
+    if(g==='female') return 'shimmer';
+    if(g==='narrator') return 'onyx';
+  }
   return 'alloy';
 }
-function getEffectiveVoice(speaker){
-  if(window._userVoiceChoice[speaker]) return window._userVoiceChoice[speaker];
-  if(speakerVoiceMap[speaker]) return speakerVoiceMap[speaker];
-  return getInitialVoice(speaker, speakerGenderMap[speaker]);
-}
-function getDistinctVoiceForSpeaker(speaker){ return getEffectiveVoice(speaker); }
 
-// Override voice dropdown population to show ALL 11 voices
-function populateVoiceDropdowns(){
+// Make dropdowns populate with ALL 11 and actually update map
+function fixVoiceDropdowns(){
   document.querySelectorAll('select[data-speaker]').forEach(sel=>{
-    let current = sel.value || getEffectiveVoice(sel.dataset.speaker);
-    // If current is ballad for female speaker, auto-correct to shimmer once
-    let gender = speakerGenderMap[sel.dataset.speaker];
-    if(gender==='female' && current==='ballad'){
-      current='shimmer';
-      window._userVoiceChoice[sel.dataset.speaker]='shimmer';
-      speakerVoiceMap[sel.dataset.speaker]='shimmer';
+    let sp = sel.dataset.speaker;
+    if(!sp) return;
+    let cur = getVoiceToPlay(sp);
+    // Ensure sel has all 11 options
+    if(sel.options.length < 6){
+      let all = [
+        ['alloy','Alloy - MALE Warm'],
+        ['ash','Ash - MALE Cinematic'],
+        ['onyx','Onyx - Narrator Deep'],
+        ['echo','Echo - MALE Resonant'],
+        ['fable','Fable - MALE Expressive'],
+        ['ballad','Ballad - MALE Melodic'],
+        ['shimmer','Shimmer - FEMALE Soft ⭐'],
+        ['coral','Coral - FEMALE Warm'],
+        ['nova','Nova - FEMALE Bright'],
+        ['sage','Sage - FEMALE Wise']
+      ];
+      sel.innerHTML='';
+      all.forEach(([id,label])=>{
+        let o=document.createElement('option');
+        o.value=id; o.textContent=label;
+        if(id===cur) o.selected=true;
+        sel.appendChild(o);
+      });
     }
-    sel.innerHTML='';
-    ALL_VOICES.forEach(v=>{
-      let opt=document.createElement('option');
-      opt.value=v.id;
-      opt.textContent=v.label;
-      if(v.id===current) opt.selected=true;
-      sel.appendChild(opt);
-    });
+    // Force value to match actual voice to play
+    sel.value = cur;
   });
 }
-document.addEventListener('change', (e)=>{
+
+// Listen and save
+document.addEventListener('change', e=>{
   if(e.target.matches('select[data-speaker]')){
-    window._userVoiceChoice[e.target.dataset.speaker]=e.target.value;
-    speakerVoiceMap[e.target.dataset.speaker]=e.target.value;
-    console.log('Voice changed', e.target.dataset.speaker, '->', e.target.value);
+    let sp=e.target.dataset.speaker, v=e.target.value;
+    window._userChoice[sp]=v;
+    if(typeof speakerVoiceMap !== 'undefined') speakerVoiceMap[sp]=v;
+    console.log('VOICE CHANGED:', sp, '->', v);
   }
 });
-setTimeout(populateVoiceDropdowns, 600);
-setInterval(populateVoiceDropdowns, 2000); // keep ensuring full list
+
+function getDistinctVoiceForSpeaker(s){ return getVoiceToPlay(s); }
+
+setTimeout(fixVoiceDropdowns, 500);
+setInterval(fixVoiceDropdowns, 2000);
 
 // V29.3 SAFE PATCH
 function getDistinctVoiceForSpeaker(speaker){
@@ -559,7 +564,7 @@ function getSpeedForIntensityV289(intensity){
 // Override playLine with working version
 async function playLineV289(i, save=true){
   let s=currentScript[i]; if(!s){alert('No line'); return;}
-  let voiceId=getDistinctVoiceForSpeaker(s.speaker);
+  let voiceId=getVoiceToPlay(s.speaker);
   let instruction=buildInstructionV289(s.speaker, s.direction, s.intensity);
   let key=getKey(); if(!key){toggleApiBox(); alert('Add API key'); return;}
   try{
