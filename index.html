@@ -22,39 +22,9 @@
   font-family: "Optimistic Mono", ui-monospace, monospace;
 }
 </style>
-<script>
-// V28.2 FIX: Expand mixed narrator+dialogue lines like: राम ने ... कहा - "सीता, ..."
-function expandMixedLinesV282(text){
-  let lines = text.split(/\n/);
-  let res=[];
-  for(let ln of lines){
-    let line=ln.trim(); if(!line){res.push(ln); continue;}
-    // Match: [up to ने] + [कहा/बोला etc] + dash + optional quote + dialogue
-    // Example: राम ने सीता का हाथ पकड़ा और धीरे से कहा - "सीता, तुम कहाँ जा रही हो?"
-    let m = line.match(/^(.+?ने.+?(?:कहा|बोली|बोला|पूछा|चिल्लाई|चिल्लाया|फुसफुसाई|फुसफुसाया|जवाब दिया))\s*[-—–:]\s*["'“”‘’]?(.*?)["'“”‘’]?\s*$/);
-    if(m){
-      let act=m[1].trim();
-      let dlg=m[2].trim();
-      if(act){res.push(act);}
-      if(dlg){res.push(dlg);}
-      continue;
-    }
-    // Also handle: Name ने ... - "dialogue" (without कहा)
-    let m2 = line.match(/^(.+?ने.*?)\s*[-—–]\s*["'“”](.+?)["'“”]\s*$/);
-    if(m2){
-      res.push(m2[1].trim());
-      res.push(m2[2].trim());
-      continue;
-    }
-    res.push(line);
-  }
-  return res.join("\n");
-}
-</script>
-
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<meta http-equiv='Cache-Control' content='no-cache, no-store, must-revalidate'><meta http-equiv='Pragma' content='no-cache'><meta http-equiv='Expires' content='0'><title>Story Director V28.6 FINAL - Full 11 Voices - Same UI + 1.25x Fix</title>
+<meta http-equiv='Cache-Control' content='no-cache, no-store, must-revalidate'><meta http-equiv='Pragma' content='no-cache'><meta http-equiv='Expires' content='0'><title>Story Director V28.9 FINAL - Full 11 Voices - Same UI + 1.25x Fix</title>
 <script src="https://cdn.tailwindcss.com"></script>
 <style>
 body{background:#120c26;color:#e9e4ff;max-width:600px;margin:auto;font-family:Inter,system-ui}
@@ -81,9 +51,15 @@ input[type=range]{accent-color:#8b5cf6}
 .direction-auto{background:#1a1230;border:1px dashed #8b5cf6;color:#a78bfa;border-radius:9999px;padding:3px 10px;font-size:8px}
 .edit-panel{background:#0e091e;border:1px solid #3d2f68;border-radius:12px;padding:10px;margin-top:8px}
 </style>
+
+<style>
+button, [onclick] { pointer-events: auto !important; touch-action: manipulation !important; -webkit-tap-highlight-color: transparent; }
+.line-card button { pointer-events: auto !important; }
+#view-ai, #view-paste, #view-director, #view-voice { pointer-events: auto !important; }
+</style>
 </head>
 <body class="pb-32">
-<header class="p-4 bg-[#0e091e] flex justify-between items-center sticky top-0 z-30"><div><h1 class="font-black text-[18px]">Story Director V28.6 FINAL 🎬 11 Voices</h1><p class="text-[9px] text-[#a78bfa]">V28.6 FINAL - Per-Line Preview + Emotion + Human Touch</p></div><div class="flex gap-2"><button onclick="toggleApiBox()" class="bg-[#241a3f] border border-[#3d2f68] text-white px-3 py-2 rounded-full text-[10px] font-black">⚙️ API</button><span class="bg-gradient-to-r from-purple-500 to-pink-500 text-white px-2 py-1 rounded-full text-[8px] font-black h-fit self-center">V28.6 FINAL</span></div></header>
+<header class="p-4 bg-[#0e091e] flex justify-between items-center sticky top-0 z-30"><div><h1 class="font-black text-[18px]">Story Director V28.9 FINAL 🎬 11 Voices</h1><p class="text-[9px] text-[#a78bfa]">V28.9 FINAL - Female Fixed + Mixed Narrator + Emotion Fix + 11 Voices</p></div><div class="flex gap-2"><button onclick="toggleApiBox()" class="bg-[#241a3f] border border-[#3d2f68] text-white px-3 py-2 rounded-full text-[10px] font-black">⚙️ API</button><span class="bg-gradient-to-r from-purple-500 to-pink-500 text-white px-2 py-1 rounded-full text-[8px] font-black h-fit self-center">V28.9 FINAL</span></div></header>
 <div id="apiBox" class="hidden p-3"><div class="card p-3 border-2 border-yellow-400 bg-[#1a1230]"><p class="text-[11px] font-black flex justify-between"><span>🔑 OpenAI Key</span><button onclick="toggleApiBox()" class="bg-black text-white rounded-full px-2 py-1 text-[8px]">✕ HIDE</button></p><input id="openaiKey" type="password" placeholder="sk-... paste once - saved forever" class="input-dark w-full mt-2 p-3 text-[11px]"><p id="apiStatus" class="text-[7px] mt-1 text-green-400"></p></div></div>
 <div class="flex justify-around p-3 bg-[#120c26] sticky top-[64px] z-20 border-b border-[#3d2f68] text-[11px] font-bold">
 <button onclick="setTab('ai')" id="tab-ai" class="tab-active pb-2">✨ AI Story</button>
@@ -91,7 +67,7 @@ input[type=range]{accent-color:#8b5cf6}
 <button onclick="setTab('director')" id="tab-director" class="tab-inactive pb-2">🎭 Director</button>
 <button onclick="setTab('voice')" id="tab-voice" class="tab-inactive pb-2">🎙 Voice</button>
 </div>
-<div id="view-ai" class="p-3 space-y-3"><div class="card p-3"><label class="text-[12px] font-bold">💡 Story Idea / Prompt</label><textarea id="idea" class="input-dark w-full h-[70px] p-3 mt-2 text-[13px] dev">राम और सीता की अस्सी घाट पर बारिश वाली शाम, मोहन की बनारसी टोकाटोकी, चाय और भौकाल</textarea><div class="mt-3"><div class="label-fixed">🎯 Extra Direction</div><input id="extra" class="input-dark w-full p-3 text-[11px]" value="Banarasi tone, with emotions, भौकाल"></div><p id="aiStatus" class="text-[8px] mt-3 bg-black p-2 rounded">Ready V28 - Voice Quality + Bhojpuri - Tap works</p><button onclick="generateStory()" class="btn-primary w-full mt-3 py-4 font-black text-[13px]">✨ Generate Story - Smart Director will auto add emotion</button><textarea id="storyOut" class="input-dark w-full h-[220px] mt-3 p-3 text-[13px] dev" placeholder="Story will appear here..."></textarea><div class="grid grid-cols-3 gap-2 mt-2"><button onclick="copyStory()" class="btn-primary py-2.5 text-[9px] font-black">📋 COPY</button><button onclick="sendToDirector()" class="btn-primary py-2.5 text-[9px] font-black">🎭 DIRECTOR →</button><button onclick="clearAI()" class="btn-ghost py-2.5 text-[9px] font-black">🗑 CLEAR ALL</button></div></div></div>
+<div id="view-ai" class="p-3 space-y-3"><div class="card p-3"><label class="text-[12px] font-bold">💡 Story Idea / Prompt</label><textarea id="idea" class="input-dark w-full h-[70px] p-3 mt-2 text-[13px] dev">राम और सीता की अस्सी घाट पर बारिश वाली शाम, मोहन की बनारसी टोकाटोकी, चाय और भौकाल</textarea><div class="mt-3"><div class="label-fixed">🎯 Extra Direction</div><input id="extra" class="input-dark w-full p-3 text-[11px]" value="Banarasi tone, with emotions, भौकाल"></div><p id="aiStatus" class="text-[8px] mt-3 bg-black p-2 rounded">Ready V26 - Female Fixed - Mixed Narrator Works</p><button onclick="generateStory()" class="btn-primary w-full mt-3 py-4 font-black text-[13px]">✨ Generate Story - Smart Director will auto add emotion</button><textarea id="storyOut" class="input-dark w-full h-[220px] mt-3 p-3 text-[13px] dev" placeholder="Story will appear here..."></textarea><div class="grid grid-cols-3 gap-2 mt-2"><button onclick="copyStory()" class="btn-primary py-2.5 text-[9px] font-black">📋 COPY</button><button onclick="sendToDirector()" class="btn-primary py-2.5 text-[9px] font-black">🎭 DIRECTOR →</button><button onclick="clearAI()" class="btn-ghost py-2.5 text-[9px] font-black">🗑 CLEAR ALL</button></div></div></div>
 <div id="view-paste" class="hidden p-3 space-y-3"><div class="card p-3"><h3 class="font-black">📋 Paste Your Story</h3><textarea id="pasteInput" class="input-dark w-full h-[200px] mt-2 p-3 text-[13px] dev">राम (कराहती हुई आवाज में) "बहुत दर्द हो रहा है।"
 सीता (चिंता में) "राम, क्या हुआ?"
 राम (अत्यंत धीमी आवाज़ में) "सीता, तुम सो गई क्या?"
@@ -138,21 +114,6 @@ function clearDirectorAll(){ clearDirector(); clearScript(); }
 function clearVoice(){ document.getElementById('audioPlayers').innerHTML=''; audioBlobs=[]; audioUrls.forEach(u=>URL.revokeObjectURL(u)); audioUrls=[]; if(masterUrl) URL.revokeObjectURL(masterUrl); masterUrl=null; document.getElementById('masterBox').classList.add('hidden'); document.getElementById('playStatus').textContent='Cleared'; document.getElementById('progressBar').style.width='0%'; }
 function resetVoice(){ clearVoice(); }
 function clearAudioOnly(){ document.getElementById('audioPlayers').innerHTML=''; }
-
-function intensityFromEmotion(dir){
-  let d=(dir||'').toLowerCase();
-  if(d.includes('फुसफुसा')||d.includes('धीरे')||d.includes('सो गई')) return 15;
-  if(d.includes('डरी')||d.includes('डर')) return 25;
-  if(d.includes('प्यार')||d.includes('शर्मा')) return 30;
-  if(d.includes('रोते')||d.includes('उदास')) return 35;
-  if(d.includes('नॉर्मल')) return 60;
-  if(d.includes('सवालिया')||d.includes('आश्चर्य')) return 65;
-  if(d.includes('खुशी')||d.includes('हँस')) return 75;
-  if(d.includes('जोश')||d.includes('वाह')) return 85;
-  if(d.includes('गुस्से')||d.includes('डाँट')||d.includes('चिल्ला')) return 95;
-  return 60;
-}
-
 function smartEmotionFromText(dialogue, fullLine){
  let d = dialogue.toLowerCase(); let f = fullLine.toLowerCase(); let txt = (d+' '+f);
  if(txt.match(/दर्द|कराह|आह|उई|सीनेमें|बहुत दर्द/)) return 'कराहती हुई आवाज में';
@@ -212,30 +173,6 @@ function autoDetect(){
   try{
     let rawLines=src.split('\n');
     rawLines.forEach(rawLine=>{
-      // V28.2 MIXED SPLITTER - handle: राम ने ... कहा - "dialogue"
-      let mixed = rawLine.trim().match(/^(.+?ने.+?(?:कहा|बोली|बोला|पूछा|चिल्लाई|चिल्लाया|जवाब दिया|फुसफुसाया))\s*[-—–:]\s*["'“”‘’]?(.*?)["'“”‘’]?\s*$/);
-      if(mixed){
-        let act = mixed[1].trim();
-        let dlg = mixed[2].trim();
-        // push narrator action
-        if(act){
-          if(!speakers.includes('Narrator')) speakers.push('Narrator');
-          let eDir=smartEmotionFromText(act, act); let eInt = intensityFromEmotion(eDir);
-          currentScript.push({speaker:'Narrator',direction:eDir,intensity:intensityFromEmotion(eDir),dialogue:act.endsWith('।')?act:act+'।',raw:act});
-        }
-        if(dlg){
-          // extract speaker name from action: first word
-          let firstWord = act.split(/\s+/)[0].replace(/[""“”':\-\*]+/g,'').trim();
-          let spName = firstWord;
-          // gender check
-          if(spName && spName.length>=2){
-            if(!speakers.includes(spName)) speakers.push(spName);
-            let eDir2=smartEmotionFromText(dlg, dlg);
-            currentScript.push({speaker:spName,direction:eDir2,intensity:intensityFromEmotion(eDir2),dialogue:dlg,raw:dlg});
-          }
-        }
-        return;
-      }
       let line=rawLine.trim(); if(!line) return;
       let cleanLine=line.replace(/^\*\*|\*\*$/g,'').trim(); if(!cleanLine||cleanLine.length<2) return;
       let sp=null, dlg=null, dir='';
@@ -258,7 +195,7 @@ function autoDetect(){
         if(words.length>=2){
           let first=words[0].replace(/[""“”':\-\*]+/g,'').trim();
           let rest=cleanLine.substring(words[0].length).trim().replace(/^[""“”'\s:]+|[""“”'\s]+$/g,'').trim();
-          let knownFemale=['सीता','प्रिया','रजनी','रूनी','मधु','स्मृति','रानी','महिला','राधा','सीमा','अनिता','सुनीता','गीता','नीता','कविता','स्मिता','पूजा','अंजली','प्रीति','सपना','सुमन','सरिता','ममता','लता','उषा','निशा','रेखा','अर्चना','वंदना'];
+          let knownFemale=['सीता','प्रिया','रजनी','रूनी','मधु','स्मृति','रानी','महिला','राधा','सीमा','अनिता','सुनीता','गीता','नीता','कविता','स्मिता'];
           let knownMale=['राम','मोहन','अमित','श्याम','राज','गृजेश','विकास'];
           let knownAll=knownFemale.concat(knownMale);
           if(first.length>=2&&first.length<=15&&knownAll.includes(first)&&rest.length>=1){
@@ -271,15 +208,15 @@ function autoDetect(){
       }
       if(sp&&dlg&&dlg.length>0){
         dlg=dlg.replace(/^[""“”'\s]+|[""“”'\s]+$/g,'').trim();
-        if(!dir) dir=smartEmotionFromText(dlg, rawLine); let lineInt=intensityFromEmotion(dir);
+        if(!dir) dir=smartEmotionFromText(dlg, rawLine);
         if(!speakers.includes(sp)) speakers.push(sp);
-        currentScript.push({speaker:sp,direction:dir,intensity: (typeof lineInt!=='undefined'?lineInt:intensityFromEmotion(dir)),dialogue:dlg,raw:rawLine}); return;
+        currentScript.push({speaker:sp,direction:dir,dialogue:dlg,raw:rawLine}); return;
       }
       if(cleanLine.length>=2){
         if(!speakers.includes('Narrator')) speakers.push('Narrator');
         let parts=cleanLine.split('।').map(s=>s.trim()).filter(s=>s.length>1);
         if(parts.length==0) parts=[cleanLine];
-        parts.forEach(p=>{let txt=p.endsWith('।')?p:p+'।'; if(txt.length<3) return; let eDir=smartEmotionFromText(txt, rawLine); currentScript.push({speaker:'Narrator',direction:eDir,intensity:intensityFromEmotion(eDir),dialogue:txt,raw:txt});});
+        parts.forEach(p=>{let txt=p.endsWith('।')?p:p+'।'; if(txt.length<3) return; let eDir=smartEmotionFromText(txt, rawLine); currentScript.push({speaker:'Narrator',direction:eDir,dialogue:txt,raw:txt});});
       }
     });
     const maleVoices=['alloy','ash','echo','fable','onyx']; const femaleVoices=['ballad','coral','nova','sage','shimmer','verse']; const narrVoices=['onyx','sage','fable'];
@@ -309,77 +246,21 @@ function renderScript(){
  let box=document.getElementById('scriptList'); box.innerHTML='';
  currentScript.forEach((c,i)=>{
   let div=document.createElement('div'); div.className='line-card';
-  div.innerHTML=`<div class="flex justify-between items-center"><span class="text-[10px] font-black">${i+1}. ${c.speaker}</span><div class="flex gap-2 items-center"><span class="direction-tag">${c.direction}</span><span class="text-[8px] bg-[#2a1f4a] px-2 py-1 rounded-full border border-[#3d2f68]">${c.intensity||60}%</span><button onclick="playLine(${i}, false)" class="bg-[#8b5cf6] text-white px-3 py-1 rounded-full text-[9px] font-black">▶️ PLAY</button><button onclick="editLine(${i})" class="direction-auto">✏️</button></div></div><p class="text-[12px] mt-2 dev">${c.dialogue}</p><div class="mt-2 flex items-center gap-2"><input type="range" min="0" max="100" value="${c.intensity||60}" data-line="${i}" class="line-intensity w-full" style="accent-color:#ec4899"><span class="text-[8px] w-8">${c.intensity||60}%</span><button onclick="playLine(${i}, false)" class="text-[9px] bg-[#ec4899]/20 border border-[#ec4899] px-2 py-1 rounded-full">🔊</button></div><div id="edit-${i}" class="edit-panel hidden"><select id="dir-${i}" class="input-dark w-full p-2 text-[9px]">${EMOTION_OPTIONS.map(e=>`<option ${e===c.direction?'selected':''}>${e}</option>`).join('')}</select><div class="flex gap-2 mt-2"><button onclick="saveEdit(${i})" class="btn-primary flex-1 py-2 text-[9px]">💾 Save & Close</button><button onclick="cancelEdit(${i})" class="btn-ghost flex-1 py-2 text-[9px]">✕ Cancel</button></div></div>`;
+  div.innerHTML=`<div class="flex justify-between items-center"><span class="text-[10px] font-black">${i+1}. ${c.speaker}</span><div class="flex gap-2"><span class="direction-tag">${c.direction}</span><button onclick="editLine(${i})" class="direction-auto">✏️</button></div></div><p class="text-[12px] mt-2 dev">${c.dialogue}</p><div id="edit-${i}" class="edit-panel hidden"><select id="dir-${i}" class="input-dark w-full p-2 text-[9px]">${EMOTION_OPTIONS.map(e=>`<option ${e===c.direction?'selected':''}>${e}</option>`).join('')}</select><div class="flex gap-2 mt-2"><button onclick="saveEdit(${i})" class="btn-primary flex-1 py-2 text-[9px]">💾 Save & Close</button><button onclick="cancelEdit(${i})" class="btn-ghost flex-1 py-2 text-[9px]">✕ Cancel</button></div></div>`;
   box.appendChild(div);
- });
- // bind line intensity
- document.querySelectorAll('.line-intensity').forEach(sl=>{
-   sl.addEventListener('input', e=>{
-     let idx=parseInt(e.target.getAttribute('data-line'));
-     currentScript[idx].intensity=parseInt(e.target.value);
-     e.target.nextElementSibling.textContent=e.target.value+'%';
-   });
  });
 }
 function editLine(i){ document.getElementById(`edit-${i}`).classList.remove('hidden'); }
 function cancelEdit(i){ document.getElementById(`edit-${i}`).classList.add('hidden'); }
 function saveEdit(i){ let sel=document.getElementById(`dir-${i}`); if(sel) currentScript[i].direction=sel.value; renderScript(); }
 function convertForVoice(){ if(!currentScript.length){alert('Detect first'); return;} setTab('voice'); document.getElementById('playStatus').textContent=`Ready - ${currentScript.length} lines, ${speakers.length} speakers`; }
-let currentAccent='Banarasi + Bhojpuri';
-function buildInstruction(speaker, direction){
-  let intensity=speakerIntensityMap[speaker]||70;
-  let act = '';
-  if(intensity<=15){ act='[WHISPER MODE] Extremely soft whisper, barely audible, breathy, intimate, very slow, close mic, secret tone'; }
-  else if(intensity<=35){ act='[SOFT MODE] Soft gentle tender voice, low volume, calm, slow, caring'; }
-  else if(intensity<=55){ act='[NORMAL MODE] Normal conversational natural Hindi, clear, moderate pace'; }
-  else if(intensity<=75){ act='[EXPRESSIVE MODE] Energetic expressive, strong emotion, clear projection, slightly faster, full feelings'; }
-  else if(intensity<=90){ act='[LOUD MODE] LOUD powerful voice, shouting projection, high energy, fast, dominant'; }
-  else { act='[SCREAM MODE] SCREAMING at top of lungs, extremely loud, intense, very fast, full shout, yelling'; }
-  
-  let emotionMap = {
-    'नॉर्मल लहजे में': 'normal calm',
-    'सवालिया लहजे में': 'curious questioning, rising tone',
-    'डरी हुई आवाज में': 'terrified, trembling, scared, shaky voice',
-    'रोते हुए': 'crying, sobbing, tearful, choked voice',
-    'गुस्से से': 'angry, furious, harsh, aggressive',
-    'खुशी से': 'joyful, laughing, cheerful, bright',
-    'प्यार से': 'loving, romantic, soft, intimate',
-    'जोश में': 'excited, energetic, enthusiastic',
-    'धीरे से': 'slow whisper, soft',
-    'डाँटते हुए': 'scolding, stern, strict',
-    'फुसफुसाते हुए': 'whispering secret'
-  };
-  let engEmotion = emotionMap[direction] || direction;
-  
-  // Speed mapping: whisper=0.7, normal=1.0, shout=1.2
-  window._currentSpeed = intensity<=20?0.75 : intensity<=40?0.9 : intensity<=70?1.0 : intensity<=85?1.15 : 1.25;
-  
-  return `${act}. You are ${speaker}. Emotion: ${engEmotion} (${direction}). Speak in Hindi with ${currentAccent||'Banarasi + Bhojpuri'} accent, भौकाल, natural. IMPORTANT: ACT the emotion with voice, don't say the emotion words. Dialogue only.`;
-}
-
-function getCurrentSpeed(){ return window._currentSpeed || 1.0; }
-
-function previewThreeVoices(sp){
-  let s=currentScript.find(x=>x.speaker==sp); let txt=s? s.dialogue : 'नमस्ते, मैं '+sp+' बोल रहा हूँ।'; let dir=s? s.direction : 'नॉर्मल लहजे';
-  let gender=speakerGenderMap[sp]||'male'; let voices = gender=='female'?['coral','nova','shimmer'] : gender=='narrator'?['onyx','sage','fable'] : ['alloy','echo','onyx'];
-  (async()=>{
-    let key=getKey(); if(!key){toggleApiBox(); return;}
-    for(let i=0;i<3;i++){
-      try{
-        let body={model:'gpt-4o-mini-tts', voice:voices[i], input:txt, instructions:buildInstruction(sp,dir)};
-        let r=await fetch('https://api.openai.com/v1/audio/speech',{method:'POST',headers:{'Authorization':'Bearer '+key,'Content-Type':'application/json'},body:JSON.stringify(body)});
-        if(r.ok){ let b=await r.blob(); let u=URL.createObjectURL(b); let a=new Audio(u); await new Promise(res=>{a.onended=res; a.play();}); await new Promise(r=>setTimeout(r,800));}
-      }catch(e){}
-    }
-  })();
-}
-
+function buildInstruction(speaker, direction){ let intensity=speakerIntensityMap[speaker]||70; return `Speak as ${speaker} in Hindi, emotion: ${direction}, intensity ${intensity}%. Natural Banarasi accent, expressive.`; }
 async function playLine(i,save=true){
- let s=currentScript[i]; let voiceId=speakerVoiceMap[s.speaker]||'alloy'; let text=s.dialogue; let instruction=buildInstruction(s.speaker, s.direction, s.intensity);
+ let s=currentScript[i]; let voiceId=speakerVoiceMap[s.speaker]||'alloy'; let text=s.dialogue; let instruction=buildInstruction(s.speaker, s.direction);
  let key=getKey(); if(!key){toggleApiBox(); throw new Error('no key');}
  let body={model:'gpt-4o-mini-tts', voice:voiceId, input:text, instructions:instruction};
  let r=await fetch('https://api.openai.com/v1/audio/speech',{method:'POST',headers:{'Authorization':'Bearer '+key,'Content-Type':'application/json'},body:JSON.stringify(body)});
- if(!r.ok){ let fb=await fetch('https://api.openai.com/v1/audio/speech',{method:'POST',headers:{'Authorization':'Bearer '+key,'Content-Type':'application/json'},body:JSON.stringify({model:'tts-1-hd', voice:voiceId, input:text, speed:getSpeedForIntensity(speaker||s?.speaker||voiceId)})}); let blob=await fb.blob(); let url=URL.createObjectURL(blob); if(save){audioBlobs.push({url,blob}); audioUrls.push(url);} let container=document.getElementById('audioPlayers'); let div=document.createElement('div'); div.className='audio-item'; div.innerHTML=`<span class="text-[9px] font-black">${i+1}. ${s.speaker} (${s.direction})</span><audio controls src="${url}" class="w-full mt-1 h-[28px]"></audio>`; container.appendChild(div); return {url,blob}; }
+ if(!r.ok){ let fb=await fetch('https://api.openai.com/v1/audio/speech',{method:'POST',headers:{'Authorization':'Bearer '+key,'Content-Type':'application/json'},body:JSON.stringify({model:'tts-1-hd', voice:voiceId, input:text, speed:1.0})}); let blob=await fb.blob(); let url=URL.createObjectURL(blob); if(save){audioBlobs.push({url,blob}); audioUrls.push(url);} let container=document.getElementById('audioPlayers'); let div=document.createElement('div'); div.className='audio-item'; div.innerHTML=`<span class="text-[9px] font-black">${i+1}. ${s.speaker} (${s.direction})</span><audio controls src="${url}" class="w-full mt-1 h-[28px]"></audio>`; container.appendChild(div); return {url,blob}; }
  let blob=await r.blob(); let url=URL.createObjectURL(blob);
  if(save){audioBlobs.push({url,blob}); audioUrls.push(url);}
  let container=document.getElementById('audioPlayers'); let div=document.createElement('div'); div.className='audio-item'; div.innerHTML=`<span class="text-[9px] font-black text-green-400">✅ ${i+1}. ${s.speaker} (${s.direction})</span><audio controls src="${url}" class="w-full mt-1 h-[28px]"></audio>`; container.appendChild(div); return {url,blob};
@@ -415,7 +296,7 @@ async function playLinePreview(i){
   try{
     let s=currentScript[i];
     let voiceId=speakerVoiceMap[s.speaker]||'alloy';
-    let instruction=buildInstruction(s.speaker, s.direction, s.intensity);
+    let instruction=buildInstruction(s.speaker, s.direction);
     let key=getKey(); if(!key){toggleApiBox(); alert('Add API key first'); return;}
     let status=document.getElementById('directorResult');
     if(status){ status.textContent=`🔊 Testing ${s.speaker} with ${voiceId}...`; status.classList.remove('hidden'); }
@@ -466,6 +347,208 @@ async function downloadAtSpeed(){
 }
 document.getElementById('previewSpeed').addEventListener('change', ()=>{ let a=document.getElementById('masterAudio'); if(a) a.playbackRate=parseFloat(document.getElementById('previewSpeed').value); });
 document.getElementById('downloadSpeed').addEventListener('change', ()=>{ let b=document.getElementById('masterDlFast'); if(b) b.textContent='⬇️ DOWNLOAD AT '+document.getElementById('downloadSpeed').value+'x (WAV)'; });
+</script>
+
+<script>
+// V28.9 CLEAN FIX - Per-Line Intensity + Mixed Splitter + Play Fix
+
+function intensityFromEmotion(dir){
+  let d=(dir||'').toLowerCase();
+  if(d.includes('फुसफुसा')||d.includes('धीरे')||d.includes('सो गई')) return 15;
+  if(d.includes('डरी')||d.includes('डर')) return 25;
+  if(d.includes('प्यार')||d.includes('शर्मा')) return 30;
+  if(d.includes('रोते')||d.includes('उदास')) return 35;
+  if(d.includes('नॉर्मल')) return 60;
+  if(d.includes('सवालिया')||d.includes('आश्चर्य')) return 65;
+  if(d.includes('खुशी')||d.includes('हँस')) return 75;
+  if(d.includes('जोश')||d.includes('वाह')) return 85;
+  if(d.includes('गुस्से')||d.includes('डाँट')||d.includes('चिल्ला')) return 95;
+  return 60;
+}
+
+function buildInstructionV289(speaker, direction, lineInt){
+  let intensity = (lineInt!==undefined) ? lineInt : (speakerIntensityMap[speaker]!==undefined ? speakerIntensityMap[speaker] : 70);
+  let isFemale = speakerGenderMap[speaker]==='female';
+  let affect='';
+  let d=(direction||'').toLowerCase();
+  if(d.includes('डरी')) affect='terrified, trembling, scared';
+  else if(d.includes('रोते')) affect='crying, sobbing, tearful';
+  else if(d.includes('गुस्से')||d.includes('डाँट')) affect='angry, furious, shouting, harsh';
+  else if(d.includes('खुशी')||d.includes('हँस')) affect='joyful, laughing, cheerful';
+  else if(d.includes('प्यार')) affect='loving, soft, romantic, intimate';
+  else if(d.includes('सवालिया')) affect='curious, questioning';
+  else if(d.includes('जोश')) affect='excited, energetic, loud';
+  else if(d.includes('फुसफुसा')||d.includes('धीरे')) affect='whispering, soft, breathy';
+  else affect='natural, expressive';
+
+  let volume='';
+  if(intensity<=15) volume='AFFECT: barely audible whisper, breathy, extremely quiet, slow';
+  else if(intensity<=35) volume='AFFECT: soft whisper, gentle, low volume, slow';
+  else if(intensity<=65) volume='AFFECT: normal conversational, expressive, clear';
+  else if(intensity<=85) volume='AFFECT: loud, powerful, energetic, fast';
+  else volume='AFFECT: SHOUTING LOUDLY, yelling, extremely loud, very fast, screaming';
+
+  return `Voice Affect: ${volume}, ${affect}. You are ${speaker} (${isFemale?'female':'male'}). Speak only dialogue with this emotion. Hindi ${currentAccent||'Banarasi'} accent. Act, don't describe.`;
+}
+
+function getSpeedForIntensityV289(intensity){
+  if(intensity<=20) return 0.85;
+  if(intensity<=40) return 0.95;
+  if(intensity<=70) return 1.0;
+  if(intensity<=85) return 1.1;
+  return 1.2;
+}
+
+// Override playLine with working version
+async function playLineV289(i, save=true){
+  let s=currentScript[i]; if(!s){alert('No line'); return;}
+  let voiceId=speakerVoiceMap[s.speaker]||'alloy';
+  let instruction=buildInstructionV289(s.speaker, s.direction, s.intensity);
+  let key=getKey(); if(!key){toggleApiBox(); alert('Add API key'); return;}
+  try{
+    let body={model:'gpt-4o-mini-tts', voice:voiceId, input:s.dialogue, instructions:instruction};
+    let r=await fetch('https://api.openai.com/v1/audio/speech',{method:'POST',headers:{'Authorization':'Bearer '+key,'Content-Type':'application/json'},body:JSON.stringify(body)});
+    let blob;
+    if(!r.ok){
+      let speed=getSpeedForIntensityV289(s.intensity||70);
+      let fb=await fetch('https://api.openai.com/v1/audio/speech',{method:'POST',headers:{'Authorization':'Bearer '+key,'Content-Type':'application/json'},body:JSON.stringify({model:'tts-1-hd', voice:voiceId, input:s.dialogue, speed:speed})});
+      if(!fb.ok){ let txt=await fb.text(); throw new Error(txt); }
+      blob=await fb.blob();
+    } else blob=await r.blob();
+    let url=URL.createObjectURL(blob);
+    if(save){
+      audioBlobs.push({url,blob}); audioUrls.push(url);
+      let container=document.getElementById('audioPlayers');
+      if(container){
+        let div=document.createElement('div'); div.className='audio-item';
+        div.innerHTML=`<span class="text-[9px] font-black text-green-400">✅ ${i+1}. ${s.speaker} (${s.direction} ${s.intensity}%)</span><audio controls autoplay src="${url}" class="w-full mt-1 h-[28px]"></audio>`;
+        container.appendChild(div);
+      }
+    } else {
+      let a=new Audio(url); a.play();
+      let container=document.getElementById('audioPlayers');
+      if(container){
+        let div=document.createElement('div'); div.className='audio-item border border-[#ec4899]';
+        div.innerHTML=`<span class="text-[9px] font-black text-[#ec4899]">▶️ Preview ${i+1}. ${s.speaker} (${s.intensity}%)</span><audio controls autoplay src="${url}" class="w-full mt-1 h-[28px]"></audio>`;
+        container.prepend(div);
+      }
+    }
+  }catch(e){ alert('Play failed: '+e.message); console.error(e); }
+}
+
+// Replace global playLine
+window.playLine = playLineV289;
+window.buildInstruction = buildInstructionV289;
+window.getSpeedForIntensity = getSpeedForIntensityV289;
+
+// Per-line render with PLAY buttons
+function renderScriptV289(){
+  let box=document.getElementById('scriptList'); if(!box) return; box.innerHTML='';
+  currentScript.forEach((c,i)=>{
+    if(c.intensity===undefined) c.intensity=intensityFromEmotion(c.direction);
+    let div=document.createElement('div'); div.className='line-card';
+    div.innerHTML=`<div class="flex justify-between items-center"><span class="text-[10px] font-black">${i+1}. ${c.speaker}</span><div class="flex gap-2 items-center"><span class="direction-tag">${c.direction}</span><span class="text-[8px] bg-[#2a1f4a] px-2 py-1 rounded-full border border-[#3d2f68]">${c.intensity}%</span><button onclick="window.playLine(${i}, false)" style="background:#8b5cf6;color:white;padding:4px 12px;border-radius:9999px;font-size:9px;font-weight:900">▶️ PLAY</button><button onclick="editLine(${i})" class="direction-auto">✏️</button></div></div><p class="text-[12px] mt-2 dev">${c.dialogue}</p><div class="mt-2 flex items-center gap-2"><input type="range" min="0" max="100" value="${c.intensity}" data-line="${i}" class="line-intensity w-full" style="accent-color:#ec4899"><span class="text-[8px] w-8">${c.intensity}%</span><button onclick="window.playLine(${i}, false)" style="background:rgba(236,72,153,0.2);border:1px solid #ec4899;padding:4px 8px;border-radius:9999px;font-size:9px">🔊</button></div><div id="edit-${i}" class="edit-panel hidden"><select id="dir-${i}" class="input-dark w-full p-2 text-[9px]">${(typeof EMOTION_OPTIONS!=='undefined'?EMOTION_OPTIONS:['नॉर्मल लहजे में','सवालिया लहजे में','डरी हुई आवाज में','रोते हुए','गुस्से से','खुशी से','प्यार से','जोश में','धीरे से','डाँटते हुए']).map(e=>`<option ${e===c.direction?'selected':''}>${e}</option>`).join('')}</select><div class="flex gap-2 mt-2"><button onclick="saveEdit(${i})" class="btn-primary flex-1 py-2 text-[9px]">💾 Save</button><button onclick="cancelEdit(${i})" class="btn-ghost flex-1 py-2 text-[9px]">✕ Cancel</button></div></div>`;
+    box.appendChild(div);
+  });
+  document.querySelectorAll('.line-intensity').forEach(sl=>{
+    sl.addEventListener('input', e=>{
+      let idx=parseInt(e.target.getAttribute('data-line'));
+      currentScript[idx].intensity=parseInt(e.target.value);
+      e.target.nextElementSibling.textContent=e.target.value+'%';
+      let badge=e.target.closest('.line-card').querySelector('span.text-\[8px\].bg-\[\#2a1f4a\]');
+      if(badge) badge.textContent=e.target.value+'%';
+    });
+  });
+}
+window.renderScript = renderScriptV289;
+
+// Patch autoDetect to split mixed lines: राम ने ... कहा - "dialogue"
+let origAutoDetect = window.autoDetect;
+window.autoDetect = function(){
+  let src=document.getElementById('pasteInput').value.trim();
+  if(!src){ let idea=document.getElementById('storyOut'); if(idea && idea.value.trim()) src=idea.value.trim(); }
+  if(!src){ alert('Paste story first'); return; }
+  currentScript=[]; speakers=[];
+  let result=document.getElementById('directorResult'); if(result) result.classList.remove('hidden');
+  try{
+    let rawLines=src.split('\n');
+    let expanded=[];
+    rawLines.forEach(l=>{
+      let line=l.trim(); if(!line) return;
+      let m=line.match(/^(.+?ने.+?(?:कहा|बोली|बोला|पूछा|चिल्लाई|चिल्लाया|जवाब दिया|फुसफुसाया))\s*[-—–:]\s*["'“”‘’]?(.*?)["'“”‘’]?\s*$/);
+      if(m){ expanded.push(m[1].trim()); expanded.push(m[2].trim()); }
+      else expanded.push(line);
+    });
+    rawLines=expanded;
+    // Now run original logic but with expanded lines
+    rawLines.forEach(rawLine=>{
+      let line=rawLine.trim(); if(!line) return;
+      let cleanLine=line.replace(/^\*\*|\*\*$/g,'').trim(); if(!cleanLine||cleanLine.length<2) return;
+      let sp=null, dlg=null, dir='';
+      let colonPos=cleanLine.indexOf(':'); let ob=cleanLine.indexOf('('), cb=cleanLine.indexOf(')');
+      if(colonPos>0&&colonPos<35){
+        let namePart=cleanLine.substring(0,colonPos).trim().replace(/\*\*/g,''); let nameOnly=namePart; let dirTmp='';
+        if(namePart.indexOf('(')>=0){ let o=namePart.indexOf('('),c=namePart.indexOf(')'); if(c>o){dirTmp=namePart.substring(o+1,c).trim(); nameOnly=namePart.substring(0,o).trim();}}
+        if(nameOnly&&nameOnly.length>=2&&nameOnly.length<=18&&!nameOnly.includes('।')&&nameOnly.split(/\s+/).length<=2){
+          let rest=cleanLine.substring(colonPos+1).trim().replace(/^[\s"“”']+|[\s"“”']+$/g,'').trim();
+          if(rest.length>0){sp=nameOnly; dlg=rest; dir=dirTmp;}
+        }
+      }else if(ob>0&&ob<30&&cb>ob&&cb<60){
+        let nameOnly=cleanLine.substring(0,ob).trim().replace(/\*\*/g,'');
+        let after=cleanLine.substring(cb+1).trim().replace(/^[\s:：\-"“”']+|[\s"“”']+$/g,'').trim();
+        if(nameOnly&&nameOnly.length>=2&&nameOnly.length<=18&&!nameOnly.includes('।')&&nameOnly.split(/\s+/).length<=2&&after.length>0){sp=nameOnly; dlg=after; dir=cleanLine.substring(ob+1,cb).trim();}
+      }
+      if(!sp){
+        let words=cleanLine.split(/\s+/);
+        if(words.length>=2){
+          let first=words[0].replace(/[""“”':\-\*]+/g,'').trim();
+          let rest=cleanLine.substring(words[0].length).trim().replace(/^[""“”'\s:]+|[""“”'\s]+$/g,'').trim();
+          let knownFemale=['सीता','प्रिया','रजनी','रूनी','मधु','स्मृति','रानी','महिला','राधा','सीमा','अनिता','सुनीता','गीता','नीता','कविता','स्मिता','पूजा','अंजली','प्रीति','सपना','सुमन','सरिता','ममता','लता','उषा','निशा','रेखा','अर्चना','वंदना'];
+          let knownMale=['राम','मोहन','अमित','श्याम','राज','गृजेश','विकास'];
+          let knownAll=knownFemale.concat(knownMale);
+          if(first.length>=2&&first.length<=15&&knownAll.includes(first)&&rest.length>=1){
+            let secondWord = rest.split(/\s+/)[0] || '';
+            let narratorMarkers = ['ने','को','का','की','के','से','में','पर','तक','लिए'];
+            if(!narratorMarkers.includes(secondWord)){ sp=first; dlg=rest; }
+          }
+        }
+      }
+      if(sp&&dlg&&dlg.length>0){
+        dlg=dlg.replace(/^[""“”'\s]+|[""“”'\s]+$/g,'').trim();
+        if(!dir) dir=smartEmotionFromText(dlg, rawLine);
+        if(!speakers.includes(sp)) speakers.push(sp);
+        currentScript.push({speaker:sp,direction:dir,intensity:intensityFromEmotion(dir),dialogue:dlg,raw:rawLine}); return;
+      }
+      if(cleanLine.length>=2){
+        if(!speakers.includes('Narrator')) speakers.push('Narrator');
+        let parts=cleanLine.split('।').map(s=>s.trim()).filter(s=>s.length>1);
+        if(parts.length==0) parts=[cleanLine];
+        parts.forEach(p=>{let txt=p.endsWith('।')?p:p+'।'; if(txt.length<3) return; let eDir=smartEmotionFromText(txt, rawLine); currentScript.push({speaker:'Narrator',direction:eDir,intensity:intensityFromEmotion(eDir),dialogue:txt,raw:txt});});
+      }
+    });
+    const maleVoices=['alloy','ash','echo','fable','onyx']; const femaleVoices=['ballad','coral','nova','sage','shimmer','verse']; const narrVoices=['onyx','sage','fable'];
+    let mi=0,fi=0,ni=0;
+    speakers.forEach(sp=>{
+      if(!speakerGenderMap[sp]){
+        let isFemale=/रजनी|सीता|रूनी|मधु|स्मृति|रानी|प्रिया|राधा|सीमा|अनिता|सुनीता|गीता|नीता|कविता|स्मिता/i.test(sp)||sp.endsWith('ी');
+        if(['राम','मोहन','गृजेश','अमित','श्याम','राज','विकास'].includes(sp)) isFemale=false;
+        speakerGenderMap[sp]=/narrator/i.test(sp)?'narrator':(isFemale?'female':'male');
+      }
+      if(!speakerVoiceMap[sp]){
+        if(speakerGenderMap[sp]=='female'){speakerVoiceMap[sp]=femaleVoices[fi%femaleVoices.length]; fi++;}
+        else if(speakerGenderMap[sp]=='narrator'){speakerVoiceMap[sp]=narrVoices[ni%narrVoices.length]; ni++;}
+        else{speakerVoiceMap[sp]=maleVoices[mi%maleVoices.length]; mi++;}
+      }
+      if(speakerIntensityMap[sp]===undefined) speakerIntensityMap[sp]=70;
+    });
+    let falseNames=['गर्मी','बिजली','रात','हवा','गुल','बादल'];
+    falseNames.forEach(fn=>{if(speakers.includes(fn)){currentScript.forEach(e=>{if(e.speaker==fn) e.speaker='Narrator';}); speakers=speakers.filter(s=>s!=fn);}});
+    renderScript(); renderSpeakers();
+    if(result){result.textContent=currentScript.length==0?'❌ 0 lines':'✅ '+currentScript.length+' lines, '+speakers.length+' speakers: '+speakers.join(', ');}
+  }catch(e){ if(result) result.textContent='❌ Error: '+e.message; console.error(e);}
+};
+
+console.log('V28.9 CLEAN FIX LOADED - All buttons working');
 </script>
 <script>(function(){var loc=location.href.replace(/#.*$/,"");var ATTR_NAMES=["data-product-id","data-productid","data-product_id","product-id","productid","product_id","data-source-entity-id","source-entity-id","source_entity_id","data-product","data-metadata","data-meta"];var DATASET_KEYS=["productId","productid","product_id","sourceEntityId","sourceentityid","source_entity_id","product","metadata","meta"];function readProductId(value){if(typeof value!=="string"||value.length===0)return null;if(/^[0-9]{6,}$/.test(value))return value;var match=value.match(/(?:product(?:_|-)?id|source(?:_|-)?entity(?:_|-)?id)["'=:\s]+([0-9]{6,})/i);return match?match[1]:null}function extractProductId(start){for(var node=start;node&&node!==document.body;node=node.parentElement){for(var i=0;i<ATTR_NAMES.length;i++){var attrValue=node.getAttribute&&node.getAttribute(ATTR_NAMES[i]);var attrProductId=readProductId(attrValue);if(attrProductId)return attrProductId}var dataset=node.dataset||null;if(dataset){for(var j=0;j<DATASET_KEYS.length;j++){var dataValue=dataset[DATASET_KEYS[j]];var dataProductId=readProductId(dataValue);if(dataProductId)return dataProductId}}}return null}function isInlineMediaSlotElement(node){return !!(node&&node.getAttribute&&node.getAttribute("data-clippy-inline-media-slot")!==null)}function findInlineMediaSlot(start){for(var node=start;node&&node!==document.body;node=node.parentElement){if(isInlineMediaSlotElement(node))return node}return null}function readInlineMediaUrl(node){if(!node)return null;return node.getAttribute&&((node.getAttribute("data-clippy-inline-media-url")||node.getAttribute("data-url")||node.getAttribute("data_url")))||node.href||null}function stripHash(url){return String(url).replace(/#.*$/,"")}function urlsMatch(a,b){if(!a||!b)return false;try{return stripHash(new URL(a,loc).href)===stripHash(new URL(b,loc).href)}catch(_){return stripHash(a)===stripHash(b)}}function isFirstPartyReelUrl(value){try{var url=new URL(value,loc);if(url.protocol!=="https:")return false;var host=url.hostname.toLowerCase();var supported=host==="instagram.com"||host.endsWith(".instagram.com")||host==="facebook.com"||host.endsWith(".facebook.com");return supported&&/\/reels?\//i.test(url.pathname)}catch(_){return false}}function isInlineMediaUrlClick(node,href){var slot=findInlineMediaSlot(node);if(!slot)return false;var slotUrl=readInlineMediaUrl(slot);if(slotUrl)return urlsMatch(href,slotUrl);return isFirstPartyReelUrl(href)}function findDataHref(start){for(var node=start;node&&node!==document.body;node=node.parentElement){if(node.getAttribute){var href=node.getAttribute("data-href")||node.getAttribute("data-url");if(href)return{href:href,node:node}}}return null}var nativeOpen=window.open;window.open=function(url){if(parent!==window&&typeof url==="string"&&/^https?:\/\//.test(url)){parent.postMessage({type:"ecto:usercontent-link-click",href:url},"*");return null}return nativeOpen?nativeOpen.apply(window,arguments):null};document.addEventListener("click",function(e){var target=e.target instanceof Element?e.target:null;if(!target)return;if(parent===window)return;var a=target.closest?target.closest("a[href]"):null;if(a&&a.href&&/^https?:\/\//.test(a.href)&&a.href.replace(/#.*$/,"")!==loc){if(isInlineMediaUrlClick(a,a.href))return;var productId=extractProductId(target)||extractProductId(a);if(productId){e.preventDefault();parent.postMessage({type:"ecto-artifact-link-click",productId:productId},"*");return}e.preventDefault();parent.postMessage({type:"ecto:usercontent-link-click",href:a.href},"*");return}var dataHref=findDataHref(target);if(dataHref&&/^https?:\/\//.test(dataHref.href)&&dataHref.href.replace(/#.*$/,"")!==loc){if(isInlineMediaUrlClick(dataHref.node,dataHref.href))return;e.preventDefault();parent.postMessage({type:"ecto:usercontent-link-click",href:dataHref.href},"*")}},true)})();</script><script>(function(){var FOCUS_TYPE="ecto:artifact-focus-request";var CLOSE_TYPE="ecto:artifact-close-request";function focusArtifactDocument(){var body=document.body;if(!body)return;try{window.focus();}catch(e){}if(!body.hasAttribute("tabindex"))body.setAttribute("tabindex","-1");try{body.focus({preventScroll:true});}catch(e){try{body.focus();}catch(e2){}}}window.addEventListener("message",function(event){if(event.source!==window.parent)return;var data=event.data;if(!data||typeof data!=="object"||data.type!==FOCUS_TYPE)return;if(document.readyState==="loading"){document.addEventListener("DOMContentLoaded",focusArtifactDocument,{once:true});return;}focusArtifactDocument();});window.addEventListener("keydown",function(event){if(event.key!=="Escape")return;window.setTimeout(function(){if(event.defaultPrevented)return;window.parent.postMessage({type:CLOSE_TYPE},"*");},0);});})();</script></body>
 </html>
