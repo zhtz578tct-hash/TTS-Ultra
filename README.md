@@ -1,37 +1,49 @@
-# TTS-Ultra 🎬 - Hindi / Bhojpuri AI Story Director V28.1
+# Story Director - 11 Voices V29.3 FINAL
 
-**LIVE APP:** https://zhtz578tct-hash.github.io/TTS-Ultra/
+🎉 Almost Perfect App - After 1 week, 29 versions
 
-> V27 BASE Locked + V28.1 Voice Quality + Mixed Narrator Fix
+### ✨ What's New in V29.3 SAFE
 
-### 🔥 What it does
-Turn any Hindi/Bhojpuri story into multi-voice audio drama with Narrator + Characters.
+**REAL Human Emotions:**
+- 15% = barely audible whisper, intimate, close mic
+- 95% = shouting at top of voice, furious, voice cracking
+- रोते हुए = sobbing, tearful, voice breaking
+- डरी हुई = trembling, shaky, gasping
+- प्यार से / शर्मा कर = soft breathy romantic, intimate
+- गुस्से से / डाँटते हुए = harsh, raging, powerful
 
-### ✅ Fixed in V27 BASE (Protected)
-- **ने Fix:** `राम ने सीता का हाथ पकड़ा` = Narrator, not Ram (critical fix)
-- **Female Auto:** पूजा, अंजली, सीता, राधा auto female voice
-- **Mixed Narrator + Dialogue:** Handles `राम ने कहा - "dialogue"` in same line
+**Distinct Voices (No Mixing):**
+- राम = Alloy (warm male)
+- सीता = Shimmer (soft breathy romantic female) - MOST distinct
+- मोहन = Ash (deep cinematic male - full Banarasi भौकाल)
+- Narrator = Onyx (deep)
 
-### 🚀 New in V28.1
-- **Mixed Line Splitter:** Auto splits `ने...कहा - "dialogue"` into 2 parts
-- **11 Voices:** Alloy, Ash, Ballad, Coral, Echo, Fable, Nova, Onyx, Sage, Shimmer, Verse
-- **Intensity Slider:** 20% = whisper, 90% = shout (real emotion)
-- **Bhojpuri + Banarasi accent**
-- **Back Tap:** iPhone back double-tap to detect speakers (mobile)
+**Bhojpuri Banarasi Tadka:**
+- Natural Banarasi Hindi + Bhojpuri warmth
+- मोहन lines = "का हो, अरे, भौकाल, Assi Ghat vibe"
+- Auto accent: Banarasi + Bhojpuri
 
-### 📦 Releases
-- **v27-base-locked** - Protected BASE (Mixed Narrator + Female + ने Fix)
-- **main branch** - V28.1 LIVE
+**Smart Script Parsing:**
+- Mixed: `राम ने कहा - "संवाद"` → auto splits into Narrator + Ram
+- Per-line intensity slider (15% to 95%)
+- Per-line emotion (शर्मा कर, डाँटते हुए, etc)
 
-### 🧪 Test Story
-```
-गर्मी की रात थी।
-राम ने सीता का हाथ पकड़ा और धीरे से कहा - "सीता, तुम कहाँ जा रही हो?"
-सीता ने डरते हुए जवाब दिया - "राम, मुझे बहुत डर लग रहा है।"
-पूजा ने चौंकते हुए कहा - "अरे! तुम दोनों यहाँ?"
-```
+**Fixed Bugs:**
+- ✅ Line PLAY preview = silent, doesn't add to Voice tab
+- ✅ Full generation = silent generation, no autoplay chaos
+- ✅ currentAccent bug fixed
+- ✅ Female voices distinct, no mixing
+- ✅ Buttons working on iPhone
 
-Expected: Narrator + राम (Male) + सीता (Female) + पूजा (Female)
+**How to Use:**
+1. Paste story in Paste tab
+2. Click AUTO DETECT + SMART EMOTION ASSIGN
+3. Per-line: adjust intensity slider, test ▶️ PLAY
+4. CONVERT FOR VOICE STUDIO → PLAY ALL
+5. Download MP3
 
----
-Built by Grijesh Singh | V27 BASE Locked Forever
+**Tech:** OpenAI gpt-4o-mini-tts + tts-1-hd fallback
+**Accent:** Banarasi + Bhojpuri
+**Voices:** 11 distinct (Alloy, Shimmer, Ash, Onyx, Coral, Nova, etc)
+
+V29.3 FINAL - Almost Perfect! 👍
