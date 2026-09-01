@@ -391,6 +391,138 @@ document.addEventListener('change', (e)=>{
   }
 });
 
+
+
+// V29.6 DIALOGUE EDIT FIX
+function enableDialogueEdit(){
+  document.addEventListener('click', function(e){
+    let btn = e.target.closest('[data-action="edit"], .edit-btn, button:has(> .pencil), button[title*="Edit"]');
+    // Also catch pencil emoji buttons
+    if(!btn){
+      let target = e.target;
+      if(target.textContent && target.textContent.includes('✏️')){
+        btn = target.closest('button') || target;
+      }
+    }
+    if(btn){
+      // Find the dialogue text near this button
+      let lineDiv = btn.closest('div');
+      let attempts=0;
+      while(lineDiv && attempts<5){
+        let dialogueEl = lineDiv.querySelector('.dialogue-text, [data-dialogue], p, div:nth-child(2)');
+        if(dialogueEl && dialogueEl.textContent.length>5) break;
+        lineDiv = lineDiv.parentElement;
+        attempts++;
+      }
+      // If we have line index from data attribute
+      let lineIdx = btn.dataset.line || btn.dataset.index || btn.getAttribute('data-line-index');
+      // Try find from sibling
+      if(!lineIdx){
+        let parent = btn.closest('[data-line], [data-index]');
+        if(parent) lineIdx = parent.dataset.line || parent.dataset.index;
+      }
+    }
+  });
+}
+
+// Better: Patch the existing edit function to also edit dialogue
+// Override render to add dialogue contenteditable
+let originalRender = window.renderScriptV289;
+if(originalRender){
+  window.renderScriptV289 = function(){
+    originalRender();
+    // After render, make dialogue editable on pencil click
+    setTimeout(()=>{
+      document.querySelectorAll('button').forEach(btn=>{
+        if(btn.textContent.includes('✏️') || btn.innerHTML.includes('✏️')){
+          btn.onclick = function(){
+            // Find line container
+            let container = this.closest('div');
+            // Go up 2 levels to find the whole line card
+            let card = this.closest('[class*="border"]') || this.parentElement?.parentElement;
+            if(!card) return;
+            // Find dialogue text - it's usually second div
+            let texts = card.querySelectorAll('div');
+            let dialogueDiv = null;
+            for(let d of texts){
+              if(d.textContent.includes('...') || d.textContent.length>10 && !d.querySelector('button') && !d.querySelector('input')){
+                // heuristic: dialogue is plain text
+                if(d.textContent.length>10 && d.textContent.length<500 && !d.textContent.includes('PLAY') && !d.textContent.includes('Intensity')){
+                  dialogueDiv = d;
+                }
+              }
+            }
+            if(!dialogueDiv){
+              // fallback: second child
+              dialogueDiv = card.children[1] || card.querySelector('div:nth-child(2)');
+            }
+            if(dialogueDiv){
+              let currentText = dialogueDiv.textContent.trim();
+              let newText = prompt('✏️ Edit Dialogue:', currentText);
+              if(newText && newText!==currentText){
+                dialogueDiv.textContent = newText;
+                // Update underlying data
+                let lineNum = card.dataset.lineIndex || Array.from(card.parentElement.children).indexOf(card);
+                // Find in global scriptLines
+                if(window.scriptLines && window.scriptLines[lineNum]){
+                  window.scriptLines[lineNum].text = newText;
+                  window.scriptLines[lineNum].dialogue = newText;
+                }
+                // Also check other global arrays
+                if(window.parsedLines && window.parsedLines[lineNum]){
+                  window.parsedLines[lineNum].text = newText;
+                }
+              }
+            }
+          };
+        }
+      });
+    }, 300);
+  };
+}
+
+// V29.6 SPEED FIX - 1.0x to 1.20x granular
+const GRANULAR_SPEEDS = [
+  {val: 1.0, label: '1.0x - Original'},
+  {val: 1.05, label: '1.05x - Slight Fast'},
+  {val: 1.10, label: '1.10x - Natural'},
+  {val: 1.15, label: '1.15x - Expressive'},
+  {val: 1.20, label: '1.20x - Crisp'}
+];
+
+function createSpeedOptions(selectEl){
+  if(!selectEl) return;
+  selectEl.innerHTML='';
+  GRANULAR_SPEEDS.forEach(s=>{
+    let opt=document.createElement('option');
+    opt.value=s.val;
+    opt.textContent=s.label;
+    selectEl.appendChild(opt);
+  });
+}
+
+// Apply to both Preview and Download selects after render
+function applyGranularSpeeds(){
+  document.querySelectorAll('select').forEach(sel=>{
+    let txt = (sel.id||'') + (sel.previousElementSibling?.textContent||'') + (sel.parentElement?.textContent||'');
+    if(txt.toLowerCase().includes('preview') || txt.toLowerCase().includes('download') || txt.toLowerCase().includes('speed')){
+      if(sel.options.length<=6){ // avoid double patch
+        // Check if already granular
+        let has105 = Array.from(sel.options).some(o=>o.value=='1.05');
+        if(!has105){
+          createSpeedOptions(sel);
+        }
+      }
+    }
+  });
+  // Also fix any datalist or custom dropdowns
+  document.querySelectorAll('[data-speed]').forEach(el=>{
+    // replace
+  });
+}
+setTimeout(applyGranularSpeeds, 800);
+setInterval(applyGranularSpeeds, 2000);
+
 // V29.3 SAFE PATCH - Distinct voices
 function getDistinctVoiceForSpeaker(speaker){
   return getEffectiveVoice(speaker);
