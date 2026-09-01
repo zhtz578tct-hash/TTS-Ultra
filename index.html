@@ -418,21 +418,21 @@ async function playLineV289(i, save=true){
     } else blob=await r.blob();
     let url=URL.createObjectURL(blob);
     if(save){
+      // Full generation: NO autoplay, silent generation - just add to list without playing
       audioBlobs.push({url,blob}); audioUrls.push(url);
       let container=document.getElementById('audioPlayers');
       if(container){
         let div=document.createElement('div'); div.className='audio-item';
-        div.innerHTML=`<span class="text-[9px] font-black text-green-400">✅ ${i+1}. ${s.speaker} (${s.direction} ${s.intensity}%)</span><audio controls autoplay src="${url}" class="w-full mt-1 h-[28px]"></audio>`;
+        div.innerHTML=`<span class="text-[9px] font-black text-green-400">✅ ${i+1}. ${s.speaker} (${s.direction} ${s.intensity}%)</span><audio controls src="${url}" class="w-full mt-1 h-[28px]"></audio>`;
         container.appendChild(div);
       }
     } else {
-      let a=new Audio(url); a.play();
-      let container=document.getElementById('audioPlayers');
-      if(container){
-        let div=document.createElement('div'); div.className='audio-item border border-[#ec4899]';
-        div.innerHTML=`<span class="text-[9px] font-black text-[#ec4899]">▶️ Preview ${i+1}. ${s.speaker} (${s.intensity}%)</span><audio controls autoplay src="${url}" class="w-full mt-1 h-[28px]"></audio>`;
-        container.prepend(div);
-      }
+      // Preview: Play instantly, but DO NOT add to Voice section list
+      let a=new Audio(url);
+      a.play().catch(e=>console.log('Autoplay blocked', e));
+      // Show temporary playing status in directorResult only, not in voice list
+      let status=document.getElementById('directorResult');
+      if(status){ status.textContent=`▶️ Playing preview Line ${i+1}: ${s.speaker} (${s.intensity}%) - ${s.dialogue.substring(0,40)}...`; status.classList.remove('hidden'); }
     }
   }catch(e){ alert('Play failed: '+e.message); console.error(e); }
 }
