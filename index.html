@@ -24,7 +24,7 @@
 </style>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<meta http-equiv='Cache-Control' content='no-cache, no-store, must-revalidate'><meta http-equiv='Pragma' content='no-cache'><meta http-equiv='Expires' content='0'><title>Story Director V30.1 FINAL - Full 11 Voices - Same UI + 1.25x Fix</title>
+<meta http-equiv='Cache-Control' content='no-cache, no-store, must-revalidate'><meta http-equiv='Pragma' content='no-cache'><meta http-equiv='Expires' content='0'><title>Story Director V30.2 FINAL - Full 11 Voices - Same UI + 1.25x Fix</title>
 <script src="https://cdn.tailwindcss.com"></script>
 <style>
 body{background:#120c26;color:#e9e4ff;max-width:600px;margin:auto;font-family:Inter,system-ui}
@@ -59,7 +59,7 @@ button, [onclick] { pointer-events: auto !important; touch-action: manipulation 
 </style>
 </head>
 <body class="pb-32">
-<header class="p-4 bg-[#0e091e] flex justify-between items-center sticky top-0 z-30"><div><h1 class="font-black text-[18px]">Story Director V30.1 FINAL 🎬 11 Voices</h1><p class="text-[9px] text-[#a78bfa]">V28.9 FINAL - Female Fixed + Mixed Narrator + Emotion Fix + 11 Voices</p></div><div class="flex gap-2"><button onclick="toggleApiBox()" class="bg-[#241a3f] border border-[#3d2f68] text-white px-3 py-2 rounded-full text-[10px] font-black">⚙️ API</button><span class="bg-gradient-to-r from-purple-500 to-pink-500 text-white px-2 py-1 rounded-full text-[8px] font-black h-fit self-center">V28.9 FINAL</span></div></header>
+<header class="p-4 bg-[#0e091e] flex justify-between items-center sticky top-0 z-30"><div><h1 class="font-black text-[18px]">Story Director V30.2 FINAL 🎬 11 Voices</h1><p class="text-[9px] text-[#a78bfa]">V28.9 FINAL - Female Fixed + Mixed Narrator + Emotion Fix + 11 Voices</p></div><div class="flex gap-2"><button onclick="toggleApiBox()" class="bg-[#241a3f] border border-[#3d2f68] text-white px-3 py-2 rounded-full text-[10px] font-black">⚙️ API</button><span class="bg-gradient-to-r from-purple-500 to-pink-500 text-white px-2 py-1 rounded-full text-[8px] font-black h-fit self-center">V28.9 FINAL</span></div></header>
 <div id="apiBox" class="hidden p-3"><div class="card p-3 border-2 border-yellow-400 bg-[#1a1230]"><p class="text-[11px] font-black flex justify-between"><span>🔑 OpenAI Key</span><button onclick="toggleApiBox()" class="bg-black text-white rounded-full px-2 py-1 text-[8px]">✕ HIDE</button></p><input id="openaiKey" type="password" placeholder="sk-... paste once - saved forever" class="input-dark w-full mt-2 p-3 text-[11px]"><p id="apiStatus" class="text-[7px] mt-1 text-green-400"></p></div></div>
 <div class="flex justify-around p-3 bg-[#120c26] sticky top-[64px] z-20 border-b border-[#3d2f68] text-[11px] font-bold">
 <button onclick="setTab('ai')" id="tab-ai" class="tab-active pb-2">✨ AI Story</button>
@@ -354,11 +354,27 @@ document.getElementById('downloadSpeed').addEventListener('change', ()=>{ let b=
 
 <script>
 
-// V30.1 VOICE FREE + FEMALE FIX
+// V30.2 VOICE FULL FREEDOM - FEMALE BALLAD BUG FIXED FOREVER
 window._userVoiceChoice = window._userVoiceChoice || {};
-function getInitialVoiceForSpeaker(speaker, gender){
-  const distinct = {'राम':'alloy','सीता':'shimmer','मोहन':'ash','Narrator':'onyx','प्रिया':'shimmer','गुजेश':'alloy','रजनी':'coral','रूनी':'nova','मधु':'sage'};
-  if(distinct[speaker]) return distinct[speaker];
+const ALL_VOICES = [
+  {id:'alloy', label:'Alloy ○ MALE - Warm Balanced'},
+  {id:'ash', label:'Ash ⛰️ MALE - Deep Cinematic'},
+  {id:'onyx', label:'Onyx 🗿 NARRATOR - Deep Storyteller'},
+  {id:'echo', label:'Echo 🔊 MALE - Resonant'},
+  {id:'fable', label:'Fable 📖 MALE - Expressive'},
+  {id:'ballad', label:'Ballad 🎵 MALE - Melodic (male)'},
+  {id:'shimmer', label:'Shimmer ♡ FEMALE - Soft Romantic (BEST FEMALE)'},
+  {id:'coral', label:'Coral 🌊 FEMALE - Warm Friendly'},
+  {id:'nova', label:'Nova ⭐ FEMALE - Bright Energetic'},
+  {id:'sage', label:'Sage 🌿 FEMALE - Wise Calm'},
+  {id:'alloy_f', label:'Alloy ♀ FEMALE - Neutral'}
+];
+const DISTINCT_DEFAULT = {
+  'राम':'alloy','सीता':'shimmer','मोहन':'ash','Narrator':'onyx',
+  'प्रिया':'shimmer','गुजेश':'alloy','रजनी':'coral','रूनी':'nova','मधु':'sage','अमित':'echo','श्याम':'fable'
+};
+function getInitialVoice(speaker, gender){
+  if(DISTINCT_DEFAULT[speaker]) return DISTINCT_DEFAULT[speaker];
   if(gender==='female') return 'shimmer';
   if(gender==='narrator') return 'onyx';
   return 'alloy';
@@ -366,15 +382,40 @@ function getInitialVoiceForSpeaker(speaker, gender){
 function getEffectiveVoice(speaker){
   if(window._userVoiceChoice[speaker]) return window._userVoiceChoice[speaker];
   if(speakerVoiceMap[speaker]) return speakerVoiceMap[speaker];
-  return getInitialVoiceForSpeaker(speaker, speakerGenderMap[speaker]);
+  return getInitialVoice(speaker, speakerGenderMap[speaker]);
+}
+function getDistinctVoiceForSpeaker(speaker){ return getEffectiveVoice(speaker); }
+
+// Override voice dropdown population to show ALL 11 voices
+function populateVoiceDropdowns(){
+  document.querySelectorAll('select[data-speaker]').forEach(sel=>{
+    let current = sel.value || getEffectiveVoice(sel.dataset.speaker);
+    // If current is ballad for female speaker, auto-correct to shimmer once
+    let gender = speakerGenderMap[sel.dataset.speaker];
+    if(gender==='female' && current==='ballad'){
+      current='shimmer';
+      window._userVoiceChoice[sel.dataset.speaker]='shimmer';
+      speakerVoiceMap[sel.dataset.speaker]='shimmer';
+    }
+    sel.innerHTML='';
+    ALL_VOICES.forEach(v=>{
+      let opt=document.createElement('option');
+      opt.value=v.id;
+      opt.textContent=v.label;
+      if(v.id===current) opt.selected=true;
+      sel.appendChild(opt);
+    });
+  });
 }
 document.addEventListener('change', (e)=>{
   if(e.target.matches('select[data-speaker]')){
     window._userVoiceChoice[e.target.dataset.speaker]=e.target.value;
     speakerVoiceMap[e.target.dataset.speaker]=e.target.value;
+    console.log('Voice changed', e.target.dataset.speaker, '->', e.target.value);
   }
 });
-function getDistinctVoiceForSpeaker(speaker){ return getEffectiveVoice(speaker); }
+setTimeout(populateVoiceDropdowns, 600);
+setInterval(populateVoiceDropdowns, 2000); // keep ensuring full list
 
 // V29.3 SAFE PATCH
 function getDistinctVoiceForSpeaker(speaker){
