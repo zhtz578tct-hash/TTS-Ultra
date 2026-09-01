@@ -244,13 +244,28 @@ function renderScript(){
  let box=document.getElementById('scriptList'); box.innerHTML='';
  currentScript.forEach((c,i)=>{
   let div=document.createElement('div'); div.className='line-card';
-  div.innerHTML=`<div class="flex justify-between items-center"><span class="text-[10px] font-black">${i+1}. ${c.speaker}</span><div class="flex gap-2"><span class="direction-tag">${c.direction}</span><button onclick="editLine(${i})" class="direction-auto">✏️</button></div></div><p class="text-[12px] mt-2 dev">${c.dialogue}</p><div id="edit-${i}" class="edit-panel hidden"><select id="dir-${i}" class="input-dark w-full p-2 text-[9px]">${EMOTION_OPTIONS.map(e=>`<option ${e===c.direction?'selected':''}>${e}</option>`).join('')}</select><div class="flex gap-2 mt-2"><button onclick="saveEdit(${i})" class="btn-primary flex-1 py-2 text-[9px]">💾 Save & Close</button><button onclick="cancelEdit(${i})" class="btn-ghost flex-1 py-2 text-[9px]">✕ Cancel</button></div></div>`;
+  div.innerHTML=`<div class="flex justify-between items-center"><span class="text-[10px] font-black">${i+1}. ${c.speaker}</span><div class="flex gap-2"><span class="direction-tag">${c.direction}</span><button onclick="editLine(${i})" class="direction-auto">✏️</button></div></div><p class="text-[12px] mt-2 dev">${c.dialogue}</p><div id="edit-${i}" class="edit-panel hidden"><p class="text-[8px] text-[#a78bfa] font-black mb-1">✏️ EDIT DIALOGUE:</p><textarea id="dlg-${i}" class="input-dark w-full p-2 text-[11px] min-h-[60px] rounded-[8px] border border-[#3d2f68]" rows="2">${c.dialogue}</textarea><p class="text-[8px] text-[#a78bfa] font-black mb-1 mt-2">🎭 EMOTION:</p><select id="dir-${i}" class="input-dark w-full p-2 text-[9px]">${EMOTION_OPTIONS.map(e=>`<option ${e===c.direction?'selected':''}>${e}</option>`).join('')}</select><div class="flex gap-2 mt-2"><button onclick="saveEdit(${i})" class="btn-primary flex-1 py-2 text-[9px]">💾 Save & Close</button><button onclick="cancelEdit(${i})" class="btn-ghost flex-1 py-2 text-[9px]">✕ Cancel</button></div></div>`;
   box.appendChild(div);
  });
 }
-function editLine(i){ document.getElementById(`edit-${i}`).classList.remove('hidden'); }
+function editLine(i){ 
+  let panel=document.getElementById(`edit-${i}`);
+  if(!panel) return;
+  panel.classList.remove('hidden');
+  // Focus dialogue textarea
+  setTimeout(()=>{
+    let ta=document.getElementById(`dlg-${i}`);
+    if(ta){ ta.focus(); ta.select(); }
+  },100);
+}
 function cancelEdit(i){ document.getElementById(`edit-${i}`).classList.add('hidden'); }
-function saveEdit(i){ let sel=document.getElementById(`dir-${i}`); if(sel) currentScript[i].direction=sel.value; renderScript(); }
+function saveEdit(i){ 
+  let sel=document.getElementById(`dir-${i}`); 
+  let ta=document.getElementById(`dlg-${i}`);
+  if(sel) currentScript[i].direction=sel.value; 
+  if(ta && ta.value.trim()) currentScript[i].dialogue=ta.value.trim();
+  renderScript(); 
+}
 function convertForVoice(){ if(!currentScript.length){alert('Detect first'); return;} setTab('voice'); document.getElementById('playStatus').textContent=`Ready - ${currentScript.length} lines, ${speakers.length} speakers`; }
 function buildInstruction(speaker, direction){ let intensity=speakerIntensityMap[speaker]||70; return `Speak as ${speaker} in Hindi, emotion: ${direction}, intensity ${intensity}%. Natural Banarasi accent, expressive.`; }
 async function playLine(i,save=true){
@@ -697,7 +712,7 @@ function renderScriptV289(){
   currentScript.forEach((c,i)=>{
     if(c.intensity===undefined) c.intensity=intensityFromEmotion(c.direction);
     let div=document.createElement('div'); div.className='line-card';
-    div.innerHTML=`<div class="flex justify-between items-center"><span class="text-[10px] font-black">${i+1}. ${c.speaker}</span><div class="flex gap-2 items-center"><span class="direction-tag">${c.direction}</span><span class="text-[8px] bg-[#2a1f4a] px-2 py-1 rounded-full border border-[#3d2f68]">${c.intensity}%</span><button onclick="window.playLine(${i}, false)" style="background:#8b5cf6;color:white;padding:4px 12px;border-radius:9999px;font-size:9px;font-weight:900">▶️ PLAY</button><button onclick="editLine(${i})" class="direction-auto">✏️</button></div></div><p class="text-[12px] mt-2 dev">${c.dialogue}</p><div class="mt-2 flex items-center gap-2"><input type="range" min="0" max="100" value="${c.intensity}" data-line="${i}" class="line-intensity w-full" style="accent-color:#ec4899"><span class="text-[8px] w-8">${c.intensity}%</span><button onclick="window.playLine(${i}, false)" style="background:rgba(236,72,153,0.2);border:1px solid #ec4899;padding:4px 8px;border-radius:9999px;font-size:9px">🔊</button></div><div id="edit-${i}" class="edit-panel hidden"><select id="dir-${i}" class="input-dark w-full p-2 text-[9px]">${(typeof EMOTION_OPTIONS!=='undefined'?EMOTION_OPTIONS:['नॉर्मल लहजे में','सवालिया लहजे में','डरी हुई आवाज में','रोते हुए','गुस्से से','खुशी से','प्यार से','जोश में','धीरे से','डाँटते हुए']).map(e=>`<option ${e===c.direction?'selected':''}>${e}</option>`).join('')}</select><div class="flex gap-2 mt-2"><button onclick="saveEdit(${i})" class="btn-primary flex-1 py-2 text-[9px]">💾 Save</button><button onclick="cancelEdit(${i})" class="btn-ghost flex-1 py-2 text-[9px]">✕ Cancel</button></div></div>`;
+    div.innerHTML=`<div class="flex justify-between items-center"><span class="text-[10px] font-black">${i+1}. ${c.speaker}</span><div class="flex gap-2 items-center"><span class="direction-tag">${c.direction}</span><span class="text-[8px] bg-[#2a1f4a] px-2 py-1 rounded-full border border-[#3d2f68]">${c.intensity}%</span><button onclick="window.playLine(${i}, false)" style="background:#8b5cf6;color:white;padding:4px 12px;border-radius:9999px;font-size:9px;font-weight:900">▶️ PLAY</button><button onclick="editLine(${i})" class="direction-auto">✏️</button></div></div><p class="text-[12px] mt-2 dev">${c.dialogue}</p><div class="mt-2 flex items-center gap-2"><input type="range" min="0" max="100" value="${c.intensity}" data-line="${i}" class="line-intensity w-full" style="accent-color:#ec4899"><span class="text-[8px] w-8">${c.intensity}%</span><button onclick="window.playLine(${i}, false)" style="background:rgba(236,72,153,0.2);border:1px solid #ec4899;padding:4px 8px;border-radius:9999px;font-size:9px">🔊</button></div><div id="edit-${i}" class="edit-panel hidden"><p class="text-[8px] text-[#a78bfa] font-black mb-1">✏️ EDIT DIALOGUE:</p><textarea id="dlg-${i}" class="input-dark w-full p-2 text-[11px] min-h-[60px] rounded-[8px] border border-[#3d2f68]" rows="2">${c.dialogue}</textarea><p class="text-[8px] text-[#a78bfa] font-black mb-1 mt-2">🎭 EMOTION:</p><select id="dir-${i}" class="input-dark w-full p-2 text-[9px]">${(typeof EMOTION_OPTIONS!=='undefined'?EMOTION_OPTIONS:['नॉर्मल लहजे में','सवालिया लहजे में','डरी हुई आवाज में','रोते हुए','गुस्से से','खुशी से','प्यार से','जोश में','धीरे से','डाँटते हुए']).map(e=>`<option ${e===c.direction?'selected':''}>${e}</option>`).join('')}</select><div class="flex gap-2 mt-2"><button onclick="saveEdit(${i})" class="btn-primary flex-1 py-2 text-[9px]">💾 Save</button><button onclick="cancelEdit(${i})" class="btn-ghost flex-1 py-2 text-[9px]">✕ Cancel</button></div></div>`;
     box.appendChild(div);
   });
   document.querySelectorAll('.line-intensity').forEach(sl=>{
