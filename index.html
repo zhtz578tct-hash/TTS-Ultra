@@ -24,7 +24,7 @@
 </style>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<meta http-equiv='Cache-Control' content='no-cache, no-store, must-revalidate'><meta http-equiv='Pragma' content='no-cache'><meta http-equiv='Expires' content='0'><title>Story Director V29.9 FINAL - V29.9 FINAL - Speed 1.05-1.20 + Dialogue Edit + 11 Voices</title>
+<meta http-equiv='Cache-Control' content='no-cache, no-store, must-revalidate'><meta http-equiv='Pragma' content='no-cache'><meta http-equiv='Expires' content='0'><title>Story Director V30.0 FINAL 🎬</title>
 <script src="https://cdn.tailwindcss.com"></script>
 <style>
 body{background:#120c26;color:#e9e4ff;max-width:600px;margin:auto;font-family:Inter,system-ui}
@@ -59,7 +59,7 @@ button, [onclick] { pointer-events: auto !important; touch-action: manipulation 
 </style>
 </head>
 <body class="pb-32">
-<header class="p-4 bg-[#0e091e] flex justify-between items-center sticky top-0 z-30"><div><h1 class="font-black text-[18px]">Story Director V29.9 FINAL 🎬 11 Voices</h1><p class="text-[9px] text-[#a78bfa]">V29.9 FINAL - Speed 1.05-1.20 + Dialogue Edit Ultra Fixed + Voice Free + 11 Voices</p></div><div class="flex gap-2"><button onclick="toggleApiBox()" class="bg-[#241a3f] border border-[#3d2f68] text-white px-3 py-2 rounded-full text-[10px] font-black">⚙️ API</button><span class="bg-gradient-to-r from-purple-500 to-pink-500 text-white px-2 py-1 rounded-full text-[8px] font-black h-fit self-center">V29.9 FINAL</span></div></header>
+<header class="p-4 bg-[#0e091e] flex justify-between items-center sticky top-0 z-30"><div><h1 class="font-black text-[18px]">Story Director V30.0 FINAL 🎬</h1><p class="text-[9px] text-[#a78bfa]">V28.9 FINAL - Female Fixed + Mixed Narrator + Emotion Fix + 11 Voices</p></div><div class="flex gap-2"><button onclick="toggleApiBox()" class="bg-[#241a3f] border border-[#3d2f68] text-white px-3 py-2 rounded-full text-[10px] font-black">⚙️ API</button><span class="bg-gradient-to-r from-purple-500 to-pink-500 text-white px-2 py-1 rounded-full text-[8px] font-black h-fit self-center">V28.9 FINAL</span></div></header>
 <div id="apiBox" class="hidden p-3"><div class="card p-3 border-2 border-yellow-400 bg-[#1a1230]"><p class="text-[11px] font-black flex justify-between"><span>🔑 OpenAI Key</span><button onclick="toggleApiBox()" class="bg-black text-white rounded-full px-2 py-1 text-[8px]">✕ HIDE</button></p><input id="openaiKey" type="password" placeholder="sk-... paste once - saved forever" class="input-dark w-full mt-2 p-3 text-[11px]"><p id="apiStatus" class="text-[7px] mt-1 text-green-400"></p></div></div>
 <div class="flex justify-around p-3 bg-[#120c26] sticky top-[64px] z-20 border-b border-[#3d2f68] text-[11px] font-bold">
 <button onclick="setTab('ai')" id="tab-ai" class="tab-active pb-2">✨ AI Story</button>
@@ -227,8 +227,13 @@ function autoDetect(){
         if(['राम','मोहन','गृजेश','अमित','श्याम','राज','विकास'].includes(sp)) isFemale=false;
         speakerGenderMap[sp]=/narrator/i.test(sp)?'narrator':(isFemale?'female':'male');
       }
-      if(!speakerVoiceMap[sp] && !window._userVoiceChoice[sp]){
-        speakerVoiceMap[sp]=getInitialVoiceForSpeaker(sp, speakerGenderMap[sp]);
+      if(!speakerVoiceMap[sp]){
+        // Use distinct map first
+        let distinct = getDistinctVoiceForSpeaker(sp);
+        if(distinct){ speakerVoiceMap[sp]=distinct; }
+        else if(speakerGenderMap[sp]=='female'){speakerVoiceMap[sp]=femaleVoices[fi%femaleVoices.length]; fi++;}
+        else if(speakerGenderMap[sp]=='narrator'){speakerVoiceMap[sp]=narrVoices[ni%narrVoices.length]; ni++;}
+        else{speakerVoiceMap[sp]=maleVoices[mi%maleVoices.length]; mi++;}
       }
       if(speakerIntensityMap[sp]===undefined) speakerIntensityMap[sp]=70;
     });
@@ -244,75 +249,17 @@ function renderScript(){
  let box=document.getElementById('scriptList'); box.innerHTML='';
  currentScript.forEach((c,i)=>{
   let div=document.createElement('div'); div.className='line-card';
-  div.innerHTML=`<div class="flex justify-between items-center"><span class="text-[10px] font-black">${i+1}. ${c.speaker}</span><div class="flex gap-2"><span class="direction-tag">${c.direction}</span><button onclick="editLine(${i})" class="direction-auto">✏️</button></div></div><p class="text-[12px] mt-2 dev">${c.dialogue}</p><div id="edit-${i}" class="edit-panel hidden"><p class="text-[8px] text-[#a78bfa] font-black mb-1">✏️ EDIT DIALOGUE:</p><textarea id="dlg-${i}" class="input-dark w-full p-2 text-[11px] min-h-[60px] rounded-[8px] border border-[#3d2f68]" rows="2">${c.dialogue}</textarea><p class="text-[8px] text-[#a78bfa] font-black mb-1 mt-2">🎭 EMOTION:</p><select id="dir-${i}" class="input-dark w-full p-2 text-[9px]">${EMOTION_OPTIONS.map(e=>`<option ${e===c.direction?'selected':''}>${e}</option>`).join('')}</select><div class="flex gap-2 mt-2"><button onclick="saveEdit(${i})" class="btn-primary flex-1 py-2 text-[9px]">💾 Save & Close</button><button onclick="cancelEdit(${i})" class="btn-ghost flex-1 py-2 text-[9px]">✕ Cancel</button></div></div>`;
+  div.innerHTML=`<div class="flex justify-between items-center"><span class="text-[10px] font-black">${i+1}. ${c.speaker}</span><div class="flex gap-2"><span class="direction-tag">${c.direction}</span><button onclick="editLine(${i})" class="direction-auto">✏️</button></div></div><p class="text-[12px] mt-2 dev">${c.dialogue}</p><div id="edit-${i}" class="edit-panel hidden"><select id="dir-${i}" class="input-dark w-full p-2 text-[9px]">${EMOTION_OPTIONS.map(e=>`<option ${e===c.direction?'selected':''}>${e}</option>`).join('')}</select><div class="flex gap-2 mt-2"><button onclick="saveEdit(${i})" class="btn-primary flex-1 py-2 text-[9px]">💾 Save & Close</button><button onclick="cancelEdit(${i})" class="btn-ghost flex-1 py-2 text-[9px]">✕ Cancel</button></div></div>`;
   box.appendChild(div);
  });
 }
-
-function editLine(i){ 
-  try{
-    let script = window.currentScript || window.scriptLines || [];
-    let item = script[i];
-    if(!item){ alert('Line not found'); return; }
-    let curDialogue = item.dialogue || item.text || '';
-    let curDir = item.direction || '';
-    
-    // Create custom modal instead of broken prompt
-    let existing = document.getElementById('customEditModal');
-    if(existing) existing.remove();
-    
-    let modal = document.createElement('div');
-    modal.id='customEditModal';
-    modal.style.cssText='position:fixed;inset:0;background:rgba(0,0,0,0.85);z-index:9999;display:flex;align-items:center;justify-content:center;padding:20px;';
-    modal.innerHTML=`
-      <div style="background:#1e1b2e;border:2px solid #8b5cf6;border-radius:16px;padding:20px;width:100%;max-width:400px;">
-        <h3 style="color:#a78bfa;font-weight:900;font-size:13px;margin-bottom:12px;">✏️ Edit Dialogue - Line ${i+1} ${item.speaker||''}</h3>
-        <p style="color:#8b8fa8;font-size:9px;margin-bottom:4px;">DIALOGUE:</p>
-        <textarea id="customDlg" style="width:100%;background:#0f0c1a;color:white;border:1px solid #3d2f68;border-radius:8px;padding:10px;font-size:12px;min-height:80px;">${curDialogue.replace(/</g,'&lt;')}</textarea>
-        <p style="color:#8b8fa8;font-size:9px;margin:8px 0 4px;">EMOTION:</p>
-        <select id="customDir" style="width:100%;background:#0f0c1a;color:white;border:1px solid #3d2f68;border-radius:8px;padding:8px;font-size:11px;">
-          ${['नॉर्मल लहजे में','धीरे से','अत्यंत धीमी आवाज़ में','सवालिया लहजे में','चिंता में','शर्मा कर','प्यार से','फुसफुसाते हुए','जोश में','खुशी से','हँसते हुए','गुस्से से','डाँटते हुए','डरी हुई आवाज में','रोते हुए','कराहती हुई आवाज में'].map(e=>`<option ${e===curDir?'selected':''}>${e}</option>`).join('')}
-        </select>
-        <div style="display:flex;gap:10px;margin-top:16px;">
-          <button id="customCancel" style="flex:1;background:#2a2440;color:#a78bfa;padding:10px;border-radius:8px;font-weight:900;font-size:11px;">✕ Cancel</button>
-          <button id="customSave" style="flex:1;background:linear-gradient(90deg,#8b5cf6,#ec4899);color:white;padding:10px;border-radius:8px;font-weight:900;font-size:11px;">💾 Save</button>
-        </div>
-      </div>
-    `;
-    document.body.appendChild(modal);
-    document.getElementById('customDlg').focus();
-    
-    document.getElementById('customCancel').onclick = ()=> modal.remove();
-    document.getElementById('customSave').onclick = ()=>{
-      let newDlg = document.getElementById('customDlg').value.trim();
-      let newDir = document.getElementById('customDir').value;
-      if(newDlg) item.dialogue = newDlg;
-      if(newDir) item.direction = newDir;
-      // Also update text field for compatibility
-      if(item.text!==undefined) item.text = newDlg;
-      modal.remove();
-      renderScript();
-    };
-    modal.onclick = (e)=>{ if(e.target===modal) modal.remove(); };
-  }catch(err){ alert('Edit error: '+err.message); }
-}
-function cancelEdit(i){ let el=document.getElementById(`edit-${i}`); if(el) el.classList.add('hidden'); }
-function saveEdit(i){ 
-  let sel=document.getElementById(`dir-${i}`); 
-  let ta=document.getElementById(`dlg-${i}`);
-  if(window.currentScript && window.currentScript[i]){
-    if(sel) window.currentScript[i].direction=sel.value; 
-    if(ta && ta.value.trim()) window.currentScript[i].dialogue=ta.value.trim();
-  }
-  let el=document.getElementById(`edit-${i}`); if(el) el.classList.add('hidden');
-  renderScript(); 
-}
-
-
+function editLine(i){ document.getElementById(`edit-${i}`).classList.remove('hidden'); }
+function cancelEdit(i){ document.getElementById(`edit-${i}`).classList.add('hidden'); }
+function saveEdit(i){ let sel=document.getElementById(`dir-${i}`); if(sel) currentScript[i].direction=sel.value; renderScript(); }
 function convertForVoice(){ if(!currentScript.length){alert('Detect first'); return;} setTab('voice'); document.getElementById('playStatus').textContent=`Ready - ${currentScript.length} lines, ${speakers.length} speakers`; }
 function buildInstruction(speaker, direction){ let intensity=speakerIntensityMap[speaker]||70; return `Speak as ${speaker} in Hindi, emotion: ${direction}, intensity ${intensity}%. Natural Banarasi accent, expressive.`; }
 async function playLine(i,save=true){
- let s=currentScript[i]; let voiceId=getEffectiveVoice(s.speaker); let text=s.dialogue; let instruction=buildInstruction(s.speaker, s.direction);
+ let s=currentScript[i]; let voiceId=getDistinctVoiceForSpeaker(s.speaker); let text=s.dialogue; let instruction=buildInstruction(s.speaker, s.direction);
  let key=getKey(); if(!key){toggleApiBox(); throw new Error('no key');}
  let body={model:'gpt-4o-mini-tts', voice:voiceId, input:text, instructions:instruction};
  let r=await fetch('https://api.openai.com/v1/audio/speech',{method:'POST',headers:{'Authorization':'Bearer '+key,'Content-Type':'application/json'},body:JSON.stringify(body)});
@@ -351,7 +298,7 @@ function testSpeaker(sp){
 async function playLinePreview(i){
   try{
     let s=currentScript[i];
-    let voiceId=getEffectiveVoice(s.speaker);
+    let voiceId=getDistinctVoiceForSpeaker(s.speaker);
     let instruction=buildInstruction(s.speaker, s.direction);
     let key=getKey(); if(!key){toggleApiBox(); alert('Add API key first'); return;}
     let status=document.getElementById('directorResult');
@@ -407,183 +354,46 @@ document.getElementById('downloadSpeed').addEventListener('change', ()=>{ let b=
 
 <script>
 
-// V29.5 VOICE FREEDOM FIX
+// V30 VOICE FREEDOM + FEMALE FIX
 const MALE_VOICES = ['alloy','ash','onyx','echo','fable','ballad'];
 const FEMALE_VOICES = ['shimmer','coral','nova','sage'];
-const DISTINCT_DEFAULTS = {
-  'राम': 'alloy',
-  'सीता': 'shimmer',
-  'मोहन': 'ash',
-  'Narrator': 'onyx',
-  'प्रिया': 'shimmer',
-  'गुजेश': 'alloy',
-  'रजनी': 'coral',
-  'रूनी': 'nova',
-  'मधु': 'sage'
-};
-
+window._userVoiceChoice = window._userVoiceChoice || {};
 function getInitialVoiceForSpeaker(speaker, gender){
-  if(DISTINCT_DEFAULTS[speaker]) return DISTINCT_DEFAULTS[speaker];
+  const distinct = {'राम':'alloy','सीता':'shimmer','मोहन':'ash','Narrator':'onyx','प्रिया':'shimmer','गुजेश':'alloy','रजनी':'coral'};
+  if(distinct[speaker]) return distinct[speaker];
   if(gender==='female') return 'shimmer';
   if(gender==='narrator') return 'onyx';
   return 'alloy';
 }
-
-// Override storage
-window._userVoiceChoice = window._userVoiceChoice || {};
-
 function getEffectiveVoice(speaker){
   if(window._userVoiceChoice[speaker]) return window._userVoiceChoice[speaker];
   if(speakerVoiceMap[speaker]) return speakerVoiceMap[speaker];
   return getInitialVoiceForSpeaker(speaker, speakerGenderMap[speaker]);
 }
-
-// Listen for any select change
 document.addEventListener('change', (e)=>{
   if(e.target.matches('select[data-speaker]')){
-    const sp = e.target.dataset.speaker;
-    const val = e.target.value;
-    window._userVoiceChoice[sp]=val;
-    speakerVoiceMap[sp]=val;
-    console.log('User chose voice:', sp, '->', val);
+    window._userVoiceChoice[e.target.dataset.speaker]=e.target.value;
+    speakerVoiceMap[e.target.dataset.speaker]=e.target.value;
   }
 });
+function getDistinctVoiceForSpeaker(speaker){ return getEffectiveVoice(speaker); }
 
-
-
-// V29.6 DIALOGUE EDIT FIX
-function enableDialogueEdit(){
-  document.addEventListener('click', function(e){
-    let btn = e.target.closest('[data-action="edit"], .edit-btn, button:has(> .pencil), button[title*="Edit"]');
-    // Also catch pencil emoji buttons
-    if(!btn){
-      let target = e.target;
-      if(target.textContent && target.textContent.includes('✏️')){
-        btn = target.closest('button') || target;
-      }
-    }
-    if(btn){
-      // Find the dialogue text near this button
-      let lineDiv = btn.closest('div');
-      let attempts=0;
-      while(lineDiv && attempts<5){
-        let dialogueEl = lineDiv.querySelector('.dialogue-text, [data-dialogue], p, div:nth-child(2)');
-        if(dialogueEl && dialogueEl.textContent.length>5) break;
-        lineDiv = lineDiv.parentElement;
-        attempts++;
-      }
-      // If we have line index from data attribute
-      let lineIdx = btn.dataset.line || btn.dataset.index || btn.getAttribute('data-line-index');
-      // Try find from sibling
-      if(!lineIdx){
-        let parent = btn.closest('[data-line], [data-index]');
-        if(parent) lineIdx = parent.dataset.line || parent.dataset.index;
-      }
-    }
-  });
-}
-
-// Better: Patch the existing edit function to also edit dialogue
-// Override render to add dialogue contenteditable
-let originalRender = window.renderScriptV289;
-if(originalRender){
-  window.renderScriptV289 = function(){
-    originalRender();
-    // After render, make dialogue editable on pencil click
-    setTimeout(()=>{
-      document.querySelectorAll('button').forEach(btn=>{
-        if(btn.textContent.includes('✏️') || btn.innerHTML.includes('✏️')){
-          btn.onclick = function(){
-            // Find line container
-            let container = this.closest('div');
-            // Go up 2 levels to find the whole line card
-            let card = this.closest('[class*="border"]') || this.parentElement?.parentElement;
-            if(!card) return;
-            // Find dialogue text - it's usually second div
-            let texts = card.querySelectorAll('div');
-            let dialogueDiv = null;
-            for(let d of texts){
-              if(d.textContent.includes('...') || d.textContent.length>10 && !d.querySelector('button') && !d.querySelector('input')){
-                // heuristic: dialogue is plain text
-                if(d.textContent.length>10 && d.textContent.length<500 && !d.textContent.includes('PLAY') && !d.textContent.includes('Intensity')){
-                  dialogueDiv = d;
-                }
-              }
-            }
-            if(!dialogueDiv){
-              // fallback: second child
-              dialogueDiv = card.children[1] || card.querySelector('div:nth-child(2)');
-            }
-            if(dialogueDiv){
-              let currentText = dialogueDiv.textContent.trim();
-              let newText = prompt('✏️ Edit Dialogue:', currentText);
-              if(newText && newText!==currentText){
-                dialogueDiv.textContent = newText;
-                // Update underlying data
-                let lineNum = card.dataset.lineIndex || Array.from(card.parentElement.children).indexOf(card);
-                // Find in global scriptLines
-                if(window.scriptLines && window.scriptLines[lineNum]){
-                  window.scriptLines[lineNum].text = newText;
-                  window.scriptLines[lineNum].dialogue = newText;
-                }
-                // Also check other global arrays
-                if(window.parsedLines && window.parsedLines[lineNum]){
-                  window.parsedLines[lineNum].text = newText;
-                }
-              }
-            }
-          };
-        }
-      });
-    }, 300);
-  };
-}
-
-// V29.6 SPEED FIX - 1.0x to 1.20x granular
-const GRANULAR_SPEEDS = [
-  {val: 1.0, label: '1.0x - Original'},
-  {val: 1.05, label: '1.05x - Slight Fast'},
-  {val: 1.10, label: '1.10x - Natural'},
-  {val: 1.15, label: '1.15x - Expressive'},
-  {val: 1.20, label: '1.20x - Crisp'}
-];
-
-function createSpeedOptions(selectEl){
-  if(!selectEl) return;
-  selectEl.innerHTML='';
-  GRANULAR_SPEEDS.forEach(s=>{
-    let opt=document.createElement('option');
-    opt.value=s.val;
-    opt.textContent=s.label;
-    selectEl.appendChild(opt);
-  });
-}
-
-// Apply to both Preview and Download selects after render
-function applyGranularSpeeds(){
-  document.querySelectorAll('select').forEach(sel=>{
-    let txt = (sel.id||'') + (sel.previousElementSibling?.textContent||'') + (sel.parentElement?.textContent||'');
-    if(txt.toLowerCase().includes('preview') || txt.toLowerCase().includes('download') || txt.toLowerCase().includes('speed')){
-      if(sel.options.length<=6){ // avoid double patch
-        // Check if already granular
-        let has105 = Array.from(sel.options).some(o=>o.value=='1.05');
-        if(!has105){
-          createSpeedOptions(sel);
-        }
-      }
-    }
-  });
-  // Also fix any datalist or custom dropdowns
-  document.querySelectorAll('[data-speed]').forEach(el=>{
-    // replace
-  });
-}
-setTimeout(applyGranularSpeeds, 800);
-setInterval(applyGranularSpeeds, 2000);
-
-// V29.3 SAFE PATCH - Distinct voices
+// V29.3 SAFE PATCH
 function getDistinctVoiceForSpeaker(speaker){
-  return getEffectiveVoice(speaker);
+  const distinctMap = {
+    'राम': 'alloy',
+    'सीता': 'shimmer',
+    'मोहन': 'ash',
+    'Narrator': 'onyx',
+    'रजनी': 'coral',
+    'रूनी': 'nova',
+    'मधु': 'sage',
+    'प्रिया': 'ballad',
+    'अमित': 'echo',
+    'श्याम': 'fable'
+  };
+  if(distinctMap[speaker]) return distinctMap[speaker];
+  return speakerVoiceMap[speaker] || (speakerGenderMap[speaker]==='female'?'shimmer':'alloy');
 }
 // V28.9 CLEAN FIX - Per-Line Intensity + Mixed Splitter + Play Fix
 
@@ -710,7 +520,7 @@ function getSpeedForIntensityV289(intensity){
 // Override playLine with working version
 async function playLineV289(i, save=true){
   let s=currentScript[i]; if(!s){alert('No line'); return;}
-  let voiceId=getEffectiveVoice(s.speaker);
+  let voiceId=getDistinctVoiceForSpeaker(s.speaker);
   let instruction=buildInstructionV289(s.speaker, s.direction, s.intensity);
   let key=getKey(); if(!key){toggleApiBox(); alert('Add API key'); return;}
   try{
@@ -755,7 +565,7 @@ function renderScriptV289(){
   currentScript.forEach((c,i)=>{
     if(c.intensity===undefined) c.intensity=intensityFromEmotion(c.direction);
     let div=document.createElement('div'); div.className='line-card';
-    div.innerHTML=`<div class="flex justify-between items-center"><span class="text-[10px] font-black">${i+1}. ${c.speaker}</span><div class="flex gap-2 items-center"><span class="direction-tag">${c.direction}</span><span class="text-[8px] bg-[#2a1f4a] px-2 py-1 rounded-full border border-[#3d2f68]">${c.intensity}%</span><button onclick="window.playLine(${i}, false)" style="background:#8b5cf6;color:white;padding:4px 12px;border-radius:9999px;font-size:9px;font-weight:900">▶️ PLAY</button><button onclick="editLine(${i})" class="direction-auto">✏️</button></div></div><p class="text-[12px] mt-2 dev">${c.dialogue}</p><div class="mt-2 flex items-center gap-2"><input type="range" min="0" max="100" value="${c.intensity}" data-line="${i}" class="line-intensity w-full" style="accent-color:#ec4899"><span class="text-[8px] w-8">${c.intensity}%</span><button onclick="window.playLine(${i}, false)" style="background:rgba(236,72,153,0.2);border:1px solid #ec4899;padding:4px 8px;border-radius:9999px;font-size:9px">🔊</button></div><div id="edit-${i}" class="edit-panel hidden"><p class="text-[8px] text-[#a78bfa] font-black mb-1">✏️ EDIT DIALOGUE:</p><textarea id="dlg-${i}" class="input-dark w-full p-2 text-[11px] min-h-[60px] rounded-[8px] border border-[#3d2f68]" rows="2">${c.dialogue}</textarea><p class="text-[8px] text-[#a78bfa] font-black mb-1 mt-2">🎭 EMOTION:</p><select id="dir-${i}" class="input-dark w-full p-2 text-[9px]">${(typeof EMOTION_OPTIONS!=='undefined'?EMOTION_OPTIONS:['नॉर्मल लहजे में','सवालिया लहजे में','डरी हुई आवाज में','रोते हुए','गुस्से से','खुशी से','प्यार से','जोश में','धीरे से','डाँटते हुए']).map(e=>`<option ${e===c.direction?'selected':''}>${e}</option>`).join('')}</select><div class="flex gap-2 mt-2"><button onclick="saveEdit(${i})" class="btn-primary flex-1 py-2 text-[9px]">💾 Save</button><button onclick="cancelEdit(${i})" class="btn-ghost flex-1 py-2 text-[9px]">✕ Cancel</button></div></div>`;
+    div.innerHTML=`<div class="flex justify-between items-center"><span class="text-[10px] font-black">${i+1}. ${c.speaker}</span><div class="flex gap-2 items-center"><span class="direction-tag">${c.direction}</span><span class="text-[8px] bg-[#2a1f4a] px-2 py-1 rounded-full border border-[#3d2f68]">${c.intensity}%</span><button onclick="window.playLine(${i}, false)" style="background:#8b5cf6;color:white;padding:4px 12px;border-radius:9999px;font-size:9px;font-weight:900">▶️ PLAY</button><button onclick="editLine(${i})" class="direction-auto">✏️</button></div></div><p class="text-[12px] mt-2 dev">${c.dialogue}</p><div class="mt-2 flex items-center gap-2"><input type="range" min="0" max="100" value="${c.intensity}" data-line="${i}" class="line-intensity w-full" style="accent-color:#ec4899"><span class="text-[8px] w-8">${c.intensity}%</span><button onclick="window.playLine(${i}, false)" style="background:rgba(236,72,153,0.2);border:1px solid #ec4899;padding:4px 8px;border-radius:9999px;font-size:9px">🔊</button></div><div id="edit-${i}" class="edit-panel hidden"><select id="dir-${i}" class="input-dark w-full p-2 text-[9px]">${(typeof EMOTION_OPTIONS!=='undefined'?EMOTION_OPTIONS:['नॉर्मल लहजे में','सवालिया लहजे में','डरी हुई आवाज में','रोते हुए','गुस्से से','खुशी से','प्यार से','जोश में','धीरे से','डाँटते हुए']).map(e=>`<option ${e===c.direction?'selected':''}>${e}</option>`).join('')}</select><div class="flex gap-2 mt-2"><button onclick="saveEdit(${i})" class="btn-primary flex-1 py-2 text-[9px]">💾 Save</button><button onclick="cancelEdit(${i})" class="btn-ghost flex-1 py-2 text-[9px]">✕ Cancel</button></div></div>`;
     box.appendChild(div);
   });
   document.querySelectorAll('.line-intensity').forEach(sl=>{
@@ -842,8 +652,13 @@ window.autoDetect = function(){
         if(['राम','मोहन','गृजेश','अमित','श्याम','राज','विकास'].includes(sp)) isFemale=false;
         speakerGenderMap[sp]=/narrator/i.test(sp)?'narrator':(isFemale?'female':'male');
       }
-      if(!speakerVoiceMap[sp] && !window._userVoiceChoice[sp]){
-        speakerVoiceMap[sp]=getInitialVoiceForSpeaker(sp, speakerGenderMap[sp]);
+      if(!speakerVoiceMap[sp]){
+        // Use distinct map first
+        let distinct = getDistinctVoiceForSpeaker(sp);
+        if(distinct){ speakerVoiceMap[sp]=distinct; }
+        else if(speakerGenderMap[sp]=='female'){speakerVoiceMap[sp]=femaleVoices[fi%femaleVoices.length]; fi++;}
+        else if(speakerGenderMap[sp]=='narrator'){speakerVoiceMap[sp]=narrVoices[ni%narrVoices.length]; ni++;}
+        else{speakerVoiceMap[sp]=maleVoices[mi%maleVoices.length]; mi++;}
       }
       if(speakerIntensityMap[sp]===undefined) speakerIntensityMap[sp]=70;
     });
