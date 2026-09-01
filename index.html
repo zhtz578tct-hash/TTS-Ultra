@@ -227,13 +227,8 @@ function autoDetect(){
         if(['राम','मोहन','गृजेश','अमित','श्याम','राज','विकास'].includes(sp)) isFemale=false;
         speakerGenderMap[sp]=/narrator/i.test(sp)?'narrator':(isFemale?'female':'male');
       }
-      if(!speakerVoiceMap[sp]){
-        // Use distinct map first
-        let distinct = getDistinctVoiceForSpeaker(sp);
-        if(distinct){ speakerVoiceMap[sp]=distinct; }
-        else if(speakerGenderMap[sp]=='female'){speakerVoiceMap[sp]=femaleVoices[fi%femaleVoices.length]; fi++;}
-        else if(speakerGenderMap[sp]=='narrator'){speakerVoiceMap[sp]=narrVoices[ni%narrVoices.length]; ni++;}
-        else{speakerVoiceMap[sp]=maleVoices[mi%maleVoices.length]; mi++;}
+      if(!speakerVoiceMap[sp] && !window._userVoiceChoice[sp]){
+        speakerVoiceMap[sp]=getInitialVoiceForSpeaker(sp, speakerGenderMap[sp]);
       }
       if(speakerIntensityMap[sp]===undefined) speakerIntensityMap[sp]=70;
     });
@@ -259,7 +254,7 @@ function saveEdit(i){ let sel=document.getElementById(`dir-${i}`); if(sel) curre
 function convertForVoice(){ if(!currentScript.length){alert('Detect first'); return;} setTab('voice'); document.getElementById('playStatus').textContent=`Ready - ${currentScript.length} lines, ${speakers.length} speakers`; }
 function buildInstruction(speaker, direction){ let intensity=speakerIntensityMap[speaker]||70; return `Speak as ${speaker} in Hindi, emotion: ${direction}, intensity ${intensity}%. Natural Banarasi accent, expressive.`; }
 async function playLine(i,save=true){
- let s=currentScript[i]; let voiceId=getDistinctVoiceForSpeaker(s.speaker); let text=s.dialogue; let instruction=buildInstruction(s.speaker, s.direction);
+ let s=currentScript[i]; let voiceId=getEffectiveVoice(s.speaker); let text=s.dialogue; let instruction=buildInstruction(s.speaker, s.direction);
  let key=getKey(); if(!key){toggleApiBox(); throw new Error('no key');}
  let body={model:'gpt-4o-mini-tts', voice:voiceId, input:text, instructions:instruction};
  let r=await fetch('https://api.openai.com/v1/audio/speech',{method:'POST',headers:{'Authorization':'Bearer '+key,'Content-Type':'application/json'},body:JSON.stringify(body)});
@@ -298,7 +293,7 @@ function testSpeaker(sp){
 async function playLinePreview(i){
   try{
     let s=currentScript[i];
-    let voiceId=getDistinctVoiceForSpeaker(s.speaker);
+    let voiceId=getEffectiveVoice(s.speaker);
     let instruction=buildInstruction(s.speaker, s.direction);
     let key=getKey(); if(!key){toggleApiBox(); alert('Add API key first'); return;}
     let status=document.getElementById('directorResult');
@@ -353,22 +348,52 @@ document.getElementById('downloadSpeed').addEventListener('change', ()=>{ let b=
 </script>
 
 <script>
+
+// V29.5 VOICE FREEDOM FIX
+const MALE_VOICES = ['alloy','ash','onyx','echo','fable','ballad'];
+const FEMALE_VOICES = ['shimmer','coral','nova','sage'];
+const DISTINCT_DEFAULTS = {
+  'राम': 'alloy',
+  'सीता': 'shimmer',
+  'मोहन': 'ash',
+  'Narrator': 'onyx',
+  'प्रिया': 'shimmer',
+  'गुजेश': 'alloy',
+  'रजनी': 'coral',
+  'रूनी': 'nova',
+  'मधु': 'sage'
+};
+
+function getInitialVoiceForSpeaker(speaker, gender){
+  if(DISTINCT_DEFAULTS[speaker]) return DISTINCT_DEFAULTS[speaker];
+  if(gender==='female') return 'shimmer';
+  if(gender==='narrator') return 'onyx';
+  return 'alloy';
+}
+
+// Override storage
+window._userVoiceChoice = window._userVoiceChoice || {};
+
+function getEffectiveVoice(speaker){
+  if(window._userVoiceChoice[speaker]) return window._userVoiceChoice[speaker];
+  if(speakerVoiceMap[speaker]) return speakerVoiceMap[speaker];
+  return getInitialVoiceForSpeaker(speaker, speakerGenderMap[speaker]);
+}
+
+// Listen for any select change
+document.addEventListener('change', (e)=>{
+  if(e.target.matches('select[data-speaker]')){
+    const sp = e.target.dataset.speaker;
+    const val = e.target.value;
+    window._userVoiceChoice[sp]=val;
+    speakerVoiceMap[sp]=val;
+    console.log('User chose voice:', sp, '->', val);
+  }
+});
+
 // V29.3 SAFE PATCH - Distinct voices
 function getDistinctVoiceForSpeaker(speaker){
-  const distinctMap = {
-    'राम': 'alloy',
-    'सीता': 'shimmer',
-    'मोहन': 'ash',
-    'Narrator': 'onyx',
-    'रजनी': 'coral',
-    'रूनी': 'nova',
-    'मधु': 'sage',
-    'प्रिया': 'ballad',
-    'अमित': 'echo',
-    'श्याम': 'fable'
-  };
-  if(distinctMap[speaker]) return distinctMap[speaker];
-  return speakerVoiceMap[speaker] || (speakerGenderMap[speaker]==='female'?'shimmer':'alloy');
+  return getEffectiveVoice(speaker);
 }
 // V28.9 CLEAN FIX - Per-Line Intensity + Mixed Splitter + Play Fix
 
@@ -495,7 +520,7 @@ function getSpeedForIntensityV289(intensity){
 // Override playLine with working version
 async function playLineV289(i, save=true){
   let s=currentScript[i]; if(!s){alert('No line'); return;}
-  let voiceId=getDistinctVoiceForSpeaker(s.speaker);
+  let voiceId=getEffectiveVoice(s.speaker);
   let instruction=buildInstructionV289(s.speaker, s.direction, s.intensity);
   let key=getKey(); if(!key){toggleApiBox(); alert('Add API key'); return;}
   try{
@@ -627,13 +652,8 @@ window.autoDetect = function(){
         if(['राम','मोहन','गृजेश','अमित','श्याम','राज','विकास'].includes(sp)) isFemale=false;
         speakerGenderMap[sp]=/narrator/i.test(sp)?'narrator':(isFemale?'female':'male');
       }
-      if(!speakerVoiceMap[sp]){
-        // Use distinct map first
-        let distinct = getDistinctVoiceForSpeaker(sp);
-        if(distinct){ speakerVoiceMap[sp]=distinct; }
-        else if(speakerGenderMap[sp]=='female'){speakerVoiceMap[sp]=femaleVoices[fi%femaleVoices.length]; fi++;}
-        else if(speakerGenderMap[sp]=='narrator'){speakerVoiceMap[sp]=narrVoices[ni%narrVoices.length]; ni++;}
-        else{speakerVoiceMap[sp]=maleVoices[mi%maleVoices.length]; mi++;}
+      if(!speakerVoiceMap[sp] && !window._userVoiceChoice[sp]){
+        speakerVoiceMap[sp]=getInitialVoiceForSpeaker(sp, speakerGenderMap[sp]);
       }
       if(speakerIntensityMap[sp]===undefined) speakerIntensityMap[sp]=70;
     });
