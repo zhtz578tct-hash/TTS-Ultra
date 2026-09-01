@@ -54,7 +54,7 @@ function expandMixedLinesV282(text){
 
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<meta http-equiv='Cache-Control' content='no-cache, no-store, must-revalidate'><meta http-equiv='Pragma' content='no-cache'><meta http-equiv='Expires' content='0'><title>Story Director V28.2 FINAL - Full 11 Voices - Same UI + 1.25x Fix</title>
+<meta http-equiv='Cache-Control' content='no-cache, no-store, must-revalidate'><meta http-equiv='Pragma' content='no-cache'><meta http-equiv='Expires' content='0'><title>Story Director V28.3 FINAL - Full 11 Voices - Same UI + 1.25x Fix</title>
 <script src="https://cdn.tailwindcss.com"></script>
 <style>
 body{background:#120c26;color:#e9e4ff;max-width:600px;margin:auto;font-family:Inter,system-ui}
@@ -83,7 +83,7 @@ input[type=range]{accent-color:#8b5cf6}
 </style>
 </head>
 <body class="pb-32">
-<header class="p-4 bg-[#0e091e] flex justify-between items-center sticky top-0 z-30"><div><h1 class="font-black text-[18px]">Story Director V28.2 FINAL 🎬 11 Voices</h1><p class="text-[9px] text-[#a78bfa]">V28.2 FINAL - Female Fixed + Mixed Narrator + Emotion Fix + 11 Voices</p></div><div class="flex gap-2"><button onclick="toggleApiBox()" class="bg-[#241a3f] border border-[#3d2f68] text-white px-3 py-2 rounded-full text-[10px] font-black">⚙️ API</button><span class="bg-gradient-to-r from-purple-500 to-pink-500 text-white px-2 py-1 rounded-full text-[8px] font-black h-fit self-center">V28.2 FINAL</span></div></header>
+<header class="p-4 bg-[#0e091e] flex justify-between items-center sticky top-0 z-30"><div><h1 class="font-black text-[18px]">Story Director V28.3 FINAL 🎬 11 Voices</h1><p class="text-[9px] text-[#a78bfa]">V28.3 FINAL - REAL Emotion Engine + Human Touch</p></div><div class="flex gap-2"><button onclick="toggleApiBox()" class="bg-[#241a3f] border border-[#3d2f68] text-white px-3 py-2 rounded-full text-[10px] font-black">⚙️ API</button><span class="bg-gradient-to-r from-purple-500 to-pink-500 text-white px-2 py-1 rounded-full text-[8px] font-black h-fit self-center">V28.3 FINAL</span></div></header>
 <div id="apiBox" class="hidden p-3"><div class="card p-3 border-2 border-yellow-400 bg-[#1a1230]"><p class="text-[11px] font-black flex justify-between"><span>🔑 OpenAI Key</span><button onclick="toggleApiBox()" class="bg-black text-white rounded-full px-2 py-1 text-[8px]">✕ HIDE</button></p><input id="openaiKey" type="password" placeholder="sk-... paste once - saved forever" class="input-dark w-full mt-2 p-3 text-[11px]"><p id="apiStatus" class="text-[7px] mt-1 text-green-400"></p></div></div>
 <div class="flex justify-around p-3 bg-[#120c26] sticky top-[64px] z-20 border-b border-[#3d2f68] text-[11px] font-bold">
 <button onclick="setTab('ai')" id="tab-ai" class="tab-active pb-2">✨ AI Story</button>
@@ -305,9 +305,37 @@ function convertForVoice(){ if(!currentScript.length){alert('Detect first'); ret
 let currentAccent='Banarasi + Bhojpuri';
 function buildInstruction(speaker, direction){
   let intensity=speakerIntensityMap[speaker]||70;
-  let intensityDesc = intensity<30?'very soft whisper, low volume' : intensity<50?'soft, gentle' : intensity<70?'normal expressive' : intensity<85?'strong loud intense' : 'very loud shouting high energy';
-  return `Speak as ${speaker} in Hindi. Emotion: ${direction}. Intensity ${intensity}% - ${intensityDesc}. Accent: ${currentAccent} tone, भौकाल, natural Hindi. Act emotion, don't speak the emotion words.`;
+  let act = '';
+  if(intensity<=15){ act='[WHISPER MODE] Extremely soft whisper, barely audible, breathy, intimate, very slow, close mic, secret tone'; }
+  else if(intensity<=35){ act='[SOFT MODE] Soft gentle tender voice, low volume, calm, slow, caring'; }
+  else if(intensity<=55){ act='[NORMAL MODE] Normal conversational natural Hindi, clear, moderate pace'; }
+  else if(intensity<=75){ act='[EXPRESSIVE MODE] Energetic expressive, strong emotion, clear projection, slightly faster, full feelings'; }
+  else if(intensity<=90){ act='[LOUD MODE] LOUD powerful voice, shouting projection, high energy, fast, dominant'; }
+  else { act='[SCREAM MODE] SCREAMING at top of lungs, extremely loud, intense, very fast, full shout, yelling'; }
+  
+  let emotionMap = {
+    'नॉर्मल लहजे में': 'normal calm',
+    'सवालिया लहजे में': 'curious questioning, rising tone',
+    'डरी हुई आवाज में': 'terrified, trembling, scared, shaky voice',
+    'रोते हुए': 'crying, sobbing, tearful, choked voice',
+    'गुस्से से': 'angry, furious, harsh, aggressive',
+    'खुशी से': 'joyful, laughing, cheerful, bright',
+    'प्यार से': 'loving, romantic, soft, intimate',
+    'जोश में': 'excited, energetic, enthusiastic',
+    'धीरे से': 'slow whisper, soft',
+    'डाँटते हुए': 'scolding, stern, strict',
+    'फुसफुसाते हुए': 'whispering secret'
+  };
+  let engEmotion = emotionMap[direction] || direction;
+  
+  // Speed mapping: whisper=0.7, normal=1.0, shout=1.2
+  window._currentSpeed = intensity<=20?0.75 : intensity<=40?0.9 : intensity<=70?1.0 : intensity<=85?1.15 : 1.25;
+  
+  return `${act}. You are ${speaker}. Emotion: ${engEmotion} (${direction}). Speak in Hindi with ${currentAccent||'Banarasi + Bhojpuri'} accent, भौकाल, natural. IMPORTANT: ACT the emotion with voice, don't say the emotion words. Dialogue only.`;
 }
+
+function getCurrentSpeed(){ return window._currentSpeed || 1.0; }
+
 function previewThreeVoices(sp){
   let s=currentScript.find(x=>x.speaker==sp); let txt=s? s.dialogue : 'नमस्ते, मैं '+sp+' बोल रहा हूँ।'; let dir=s? s.direction : 'नॉर्मल लहजे';
   let gender=speakerGenderMap[sp]||'male'; let voices = gender=='female'?['coral','nova','shimmer'] : gender=='narrator'?['onyx','sage','fable'] : ['alloy','echo','onyx'];
