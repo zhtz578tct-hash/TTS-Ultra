@@ -228,7 +228,10 @@ function autoDetect(){
         speakerGenderMap[sp]=/narrator/i.test(sp)?'narrator':(isFemale?'female':'male');
       }
       if(!speakerVoiceMap[sp]){
-        if(speakerGenderMap[sp]=='female'){speakerVoiceMap[sp]=femaleVoices[fi%femaleVoices.length]; fi++;}
+        // Use distinct map first
+        let distinct = getDistinctVoiceForSpeaker(sp);
+        if(distinct){ speakerVoiceMap[sp]=distinct; }
+        else if(speakerGenderMap[sp]=='female'){speakerVoiceMap[sp]=femaleVoices[fi%femaleVoices.length]; fi++;}
         else if(speakerGenderMap[sp]=='narrator'){speakerVoiceMap[sp]=narrVoices[ni%narrVoices.length]; ni++;}
         else{speakerVoiceMap[sp]=maleVoices[mi%maleVoices.length]; mi++;}
       }
@@ -256,7 +259,7 @@ function saveEdit(i){ let sel=document.getElementById(`dir-${i}`); if(sel) curre
 function convertForVoice(){ if(!currentScript.length){alert('Detect first'); return;} setTab('voice'); document.getElementById('playStatus').textContent=`Ready - ${currentScript.length} lines, ${speakers.length} speakers`; }
 function buildInstruction(speaker, direction){ let intensity=speakerIntensityMap[speaker]||70; return `Speak as ${speaker} in Hindi, emotion: ${direction}, intensity ${intensity}%. Natural Banarasi accent, expressive.`; }
 async function playLine(i,save=true){
- let s=currentScript[i]; let voiceId=speakerVoiceMap[s.speaker]||'alloy'; let text=s.dialogue; let instruction=buildInstruction(s.speaker, s.direction);
+ let s=currentScript[i]; let voiceId=getDistinctVoiceForSpeaker(s.speaker); let text=s.dialogue; let instruction=buildInstruction(s.speaker, s.direction);
  let key=getKey(); if(!key){toggleApiBox(); throw new Error('no key');}
  let body={model:'gpt-4o-mini-tts', voice:voiceId, input:text, instructions:instruction};
  let r=await fetch('https://api.openai.com/v1/audio/speech',{method:'POST',headers:{'Authorization':'Bearer '+key,'Content-Type':'application/json'},body:JSON.stringify(body)});
@@ -295,7 +298,7 @@ function testSpeaker(sp){
 async function playLinePreview(i){
   try{
     let s=currentScript[i];
-    let voiceId=speakerVoiceMap[s.speaker]||'alloy';
+    let voiceId=getDistinctVoiceForSpeaker(s.speaker);
     let instruction=buildInstruction(s.speaker, s.direction);
     let key=getKey(); if(!key){toggleApiBox(); alert('Add API key first'); return;}
     let status=document.getElementById('directorResult');
@@ -350,6 +353,23 @@ document.getElementById('downloadSpeed').addEventListener('change', ()=>{ let b=
 </script>
 
 <script>
+// V29.3 SAFE PATCH - Distinct voices
+function getDistinctVoiceForSpeaker(speaker){
+  const distinctMap = {
+    'राम': 'alloy',
+    'सीता': 'shimmer',
+    'मोहन': 'ash',
+    'Narrator': 'onyx',
+    'रजनी': 'coral',
+    'रूनी': 'nova',
+    'मधु': 'sage',
+    'प्रिया': 'ballad',
+    'अमित': 'echo',
+    'श्याम': 'fable'
+  };
+  if(distinctMap[speaker]) return distinctMap[speaker];
+  return speakerVoiceMap[speaker] || (speakerGenderMap[speaker]==='female'?'shimmer':'alloy');
+}
 // V28.9 CLEAN FIX - Per-Line Intensity + Mixed Splitter + Play Fix
 
 function intensityFromEmotion(dir){
@@ -451,7 +471,15 @@ function buildInstructionV289(speaker, direction, lineInt){
   }
 
   // Final instruction - gpt-4o-mini-tts loves this detailed format
-  return `Voice Affect: ${volume}. Emotion: ${affect}. Breathing: ${breath}. Pace: ${pace}. You are ${speaker} (${isFemale?'female, feminine voice':'male, masculine voice'}). Speak ONLY the dialogue, act the emotion with your voice, don't say emotion words. Add natural pauses for crying or fear if needed. Language: Hindi, accent: ${window.currentAccent||'Banarasi + Bhojpuri'} with natural भौकाल, warm, human. Dialogue must sound like real human feeling this emotion.`;
+  let bhojpuriFlavor = '';
+  if(speaker==='मोहन' || d.includes('भौकाल') || d.includes('बनारसी')){
+    bhojpuriFlavor = 'Add Banarasi Bhojpuri tadka: natural "का हो, अरे, देखा, भौकाल" style, Assi Ghat Varanasi vibe, warm, desi.';
+  } else if(isFemale && (d.includes('प्यार') || d.includes('शर्मा'))){
+    bhojpuriFlavor = 'Soft Purvanchal feminine touch, gentle "अरे", sweet Bhojpuri softness, intimate.';
+  } else {
+    bhojpuriFlavor = 'Natural Banarasi Hindi with subtle Bhojpuri warmth, authentic UP tone, भौकाल but natural.';
+  }
+  return `Voice Affect: ${volume}. Emotion: ${affect}. Breathing: ${breath}. Pace: ${pace}. ${bhojpuriFlavor} You are ${speaker} (${isFemale?'female, feminine voice':'male, masculine voice'}). Speak ONLY the dialogue, act the emotion with your voice, don't say emotion words. Add natural pauses for crying or fear if needed. Language: Hindi, accent: ${window.currentAccent||'Banarasi + Bhojpuri'} with natural भौकाल, warm, human. Dialogue must sound like real human feeling this emotion.`;
 }
 
 function getSpeedForIntensityV289(intensity){
@@ -467,7 +495,7 @@ function getSpeedForIntensityV289(intensity){
 // Override playLine with working version
 async function playLineV289(i, save=true){
   let s=currentScript[i]; if(!s){alert('No line'); return;}
-  let voiceId=speakerVoiceMap[s.speaker]||'alloy';
+  let voiceId=getDistinctVoiceForSpeaker(s.speaker);
   let instruction=buildInstructionV289(s.speaker, s.direction, s.intensity);
   let key=getKey(); if(!key){toggleApiBox(); alert('Add API key'); return;}
   try{
@@ -600,7 +628,10 @@ window.autoDetect = function(){
         speakerGenderMap[sp]=/narrator/i.test(sp)?'narrator':(isFemale?'female':'male');
       }
       if(!speakerVoiceMap[sp]){
-        if(speakerGenderMap[sp]=='female'){speakerVoiceMap[sp]=femaleVoices[fi%femaleVoices.length]; fi++;}
+        // Use distinct map first
+        let distinct = getDistinctVoiceForSpeaker(sp);
+        if(distinct){ speakerVoiceMap[sp]=distinct; }
+        else if(speakerGenderMap[sp]=='female'){speakerVoiceMap[sp]=femaleVoices[fi%femaleVoices.length]; fi++;}
         else if(speakerGenderMap[sp]=='narrator'){speakerVoiceMap[sp]=narrVoices[ni%narrVoices.length]; ni++;}
         else{speakerVoiceMap[sp]=maleVoices[mi%maleVoices.length]; mi++;}
       }
