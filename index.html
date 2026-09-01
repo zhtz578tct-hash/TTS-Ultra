@@ -159,6 +159,23 @@ function saveSpeakerMap(){ localStorage.setItem('speakerVoiceMap', JSON.stringif
 
 
 
+
+function splitMixedLine(line){
+  // Pattern: NAME ने ... कहा - "dialogue"  or NAME ने ... कहा - dialogue
+  let m = line.match(/^(.+?ने.+?(?:कहा|बोला|पूछा|चिल्लाया|फुसफुसाया))\s*[-—–]\s*["'“”]?(.*?)["'“”]?\s*$/);
+  if(m){
+    let action = m[1].trim(); // राम ने सीता का हाथ पकड़ा और धीरे से कहा
+    let dialogue = m[2].trim();
+    // Extract name from action
+    let nameMatch = action.match(/^([\u0900-\u097F]+)/);
+    let speaker = nameMatch? nameMatch[1] : null;
+    if(speaker && dialogue.length>1){
+      return [{speaker:'Narrator', text: action, emotion:'नॉर्मल लहजे'}, {speaker: speaker, text: dialogue, emotion:'नॉर्मल लहजे'}];
+    }
+  }
+  return null;
+}
+
 function autoDetect(){
   let src=document.getElementById('pasteInput').value.trim();
   if(!src){alert('Paste story first'); return;}
@@ -189,7 +206,7 @@ function autoDetect(){
         if(words.length>=2){
           let first=words[0].replace(/[""“”':\-\*]+/g,'').trim();
           let rest=cleanLine.substring(words[0].length).trim().replace(/^[""“”'\s:]+|[""“”'\s]+$/g,'').trim();
-          let knownFemale=['सीता','प्रिया','रजनी','रूनी','मधु','स्मृति','रानी','महिला','राधा','सीमा','अनिता','सुनीता','गीता','नीता','कविता','स्मिता','पूजा','अंजली','प्रीति','सपना','सुमन','सरिता','ममता','लता','उषा','निशा','रेखा','अर्चना','वंदना'];
+          let knownFemale=['सीता','प्रिया','रजनी','रूनी','मधु','स्मृति','रानी','महिला','राधा','सीमा','अनिता','सुनीता','गीता','नीता','कविता','स्मिता','पूजा','अंजली','प्रीति','सपना','सुमन','सरिता','ममता','लता','उषा','निशा','रेखा','अर्चना','वंदना','पार्वती','सावित्री'];
           let knownMale=['राम','मोहन','अमित','श्याम','राज','गृजेश','विकास'];
           let knownAll=knownFemale.concat(knownMale);
           if(first.length>=2&&first.length<=15&&knownAll.includes(first)&&rest.length>=1){
