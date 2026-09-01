@@ -54,7 +54,7 @@ function expandMixedLinesV282(text){
 
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<meta http-equiv='Cache-Control' content='no-cache, no-store, must-revalidate'><meta http-equiv='Pragma' content='no-cache'><meta http-equiv='Expires' content='0'><title>Story Director V28.3 FINAL - Full 11 Voices - Same UI + 1.25x Fix</title>
+<meta http-equiv='Cache-Control' content='no-cache, no-store, must-revalidate'><meta http-equiv='Pragma' content='no-cache'><meta http-equiv='Expires' content='0'><title>Story Director V28.6 FINAL - Full 11 Voices - Same UI + 1.25x Fix</title>
 <script src="https://cdn.tailwindcss.com"></script>
 <style>
 body{background:#120c26;color:#e9e4ff;max-width:600px;margin:auto;font-family:Inter,system-ui}
@@ -83,7 +83,7 @@ input[type=range]{accent-color:#8b5cf6}
 </style>
 </head>
 <body class="pb-32">
-<header class="p-4 bg-[#0e091e] flex justify-between items-center sticky top-0 z-30"><div><h1 class="font-black text-[18px]">Story Director V28.3 FINAL 🎬 11 Voices</h1><p class="text-[9px] text-[#a78bfa]">V28.3 FINAL - REAL Emotion Engine + Human Touch</p></div><div class="flex gap-2"><button onclick="toggleApiBox()" class="bg-[#241a3f] border border-[#3d2f68] text-white px-3 py-2 rounded-full text-[10px] font-black">⚙️ API</button><span class="bg-gradient-to-r from-purple-500 to-pink-500 text-white px-2 py-1 rounded-full text-[8px] font-black h-fit self-center">V28.3 FINAL</span></div></header>
+<header class="p-4 bg-[#0e091e] flex justify-between items-center sticky top-0 z-30"><div><h1 class="font-black text-[18px]">Story Director V28.6 FINAL 🎬 11 Voices</h1><p class="text-[9px] text-[#a78bfa]">V28.6 FINAL - Per-Line Preview + Emotion + Human Touch</p></div><div class="flex gap-2"><button onclick="toggleApiBox()" class="bg-[#241a3f] border border-[#3d2f68] text-white px-3 py-2 rounded-full text-[10px] font-black">⚙️ API</button><span class="bg-gradient-to-r from-purple-500 to-pink-500 text-white px-2 py-1 rounded-full text-[8px] font-black h-fit self-center">V28.6 FINAL</span></div></header>
 <div id="apiBox" class="hidden p-3"><div class="card p-3 border-2 border-yellow-400 bg-[#1a1230]"><p class="text-[11px] font-black flex justify-between"><span>🔑 OpenAI Key</span><button onclick="toggleApiBox()" class="bg-black text-white rounded-full px-2 py-1 text-[8px]">✕ HIDE</button></p><input id="openaiKey" type="password" placeholder="sk-... paste once - saved forever" class="input-dark w-full mt-2 p-3 text-[11px]"><p id="apiStatus" class="text-[7px] mt-1 text-green-400"></p></div></div>
 <div class="flex justify-around p-3 bg-[#120c26] sticky top-[64px] z-20 border-b border-[#3d2f68] text-[11px] font-bold">
 <button onclick="setTab('ai')" id="tab-ai" class="tab-active pb-2">✨ AI Story</button>
@@ -138,6 +138,21 @@ function clearDirectorAll(){ clearDirector(); clearScript(); }
 function clearVoice(){ document.getElementById('audioPlayers').innerHTML=''; audioBlobs=[]; audioUrls.forEach(u=>URL.revokeObjectURL(u)); audioUrls=[]; if(masterUrl) URL.revokeObjectURL(masterUrl); masterUrl=null; document.getElementById('masterBox').classList.add('hidden'); document.getElementById('playStatus').textContent='Cleared'; document.getElementById('progressBar').style.width='0%'; }
 function resetVoice(){ clearVoice(); }
 function clearAudioOnly(){ document.getElementById('audioPlayers').innerHTML=''; }
+
+function intensityFromEmotion(dir){
+  let d=(dir||'').toLowerCase();
+  if(d.includes('फुसफुसा')||d.includes('धीरे')||d.includes('सो गई')) return 15;
+  if(d.includes('डरी')||d.includes('डर')) return 25;
+  if(d.includes('प्यार')||d.includes('शर्मा')) return 30;
+  if(d.includes('रोते')||d.includes('उदास')) return 35;
+  if(d.includes('नॉर्मल')) return 60;
+  if(d.includes('सवालिया')||d.includes('आश्चर्य')) return 65;
+  if(d.includes('खुशी')||d.includes('हँस')) return 75;
+  if(d.includes('जोश')||d.includes('वाह')) return 85;
+  if(d.includes('गुस्से')||d.includes('डाँट')||d.includes('चिल्ला')) return 95;
+  return 60;
+}
+
 function smartEmotionFromText(dialogue, fullLine){
  let d = dialogue.toLowerCase(); let f = fullLine.toLowerCase(); let txt = (d+' '+f);
  if(txt.match(/दर्द|कराह|आह|उई|सीनेमें|बहुत दर्द/)) return 'कराहती हुई आवाज में';
@@ -205,8 +220,8 @@ function autoDetect(){
         // push narrator action
         if(act){
           if(!speakers.includes('Narrator')) speakers.push('Narrator');
-          let eDir=smartEmotionFromText(act, act);
-          currentScript.push({speaker:'Narrator',direction:eDir,dialogue:act.endsWith('।')?act:act+'।',raw:act});
+          let eDir=smartEmotionFromText(act, act); let eInt = intensityFromEmotion(eDir);
+          currentScript.push({speaker:'Narrator',direction:eDir,intensity:intensityFromEmotion(eDir),dialogue:act.endsWith('।')?act:act+'।',raw:act});
         }
         if(dlg){
           // extract speaker name from action: first word
@@ -216,7 +231,7 @@ function autoDetect(){
           if(spName && spName.length>=2){
             if(!speakers.includes(spName)) speakers.push(spName);
             let eDir2=smartEmotionFromText(dlg, dlg);
-            currentScript.push({speaker:spName,direction:eDir2,dialogue:dlg,raw:dlg});
+            currentScript.push({speaker:spName,direction:eDir2,intensity:intensityFromEmotion(eDir2),dialogue:dlg,raw:dlg});
           }
         }
         return;
@@ -256,15 +271,15 @@ function autoDetect(){
       }
       if(sp&&dlg&&dlg.length>0){
         dlg=dlg.replace(/^[""“”'\s]+|[""“”'\s]+$/g,'').trim();
-        if(!dir) dir=smartEmotionFromText(dlg, rawLine);
+        if(!dir) dir=smartEmotionFromText(dlg, rawLine); let lineInt=intensityFromEmotion(dir);
         if(!speakers.includes(sp)) speakers.push(sp);
-        currentScript.push({speaker:sp,direction:dir,dialogue:dlg,raw:rawLine}); return;
+        currentScript.push({speaker:sp,direction:dir,intensity: (typeof lineInt!=='undefined'?lineInt:intensityFromEmotion(dir)),dialogue:dlg,raw:rawLine}); return;
       }
       if(cleanLine.length>=2){
         if(!speakers.includes('Narrator')) speakers.push('Narrator');
         let parts=cleanLine.split('।').map(s=>s.trim()).filter(s=>s.length>1);
         if(parts.length==0) parts=[cleanLine];
-        parts.forEach(p=>{let txt=p.endsWith('।')?p:p+'।'; if(txt.length<3) return; let eDir=smartEmotionFromText(txt, rawLine); currentScript.push({speaker:'Narrator',direction:eDir,dialogue:txt,raw:txt});});
+        parts.forEach(p=>{let txt=p.endsWith('।')?p:p+'।'; if(txt.length<3) return; let eDir=smartEmotionFromText(txt, rawLine); currentScript.push({speaker:'Narrator',direction:eDir,intensity:intensityFromEmotion(eDir),dialogue:txt,raw:txt});});
       }
     });
     const maleVoices=['alloy','ash','echo','fable','onyx']; const femaleVoices=['ballad','coral','nova','sage','shimmer','verse']; const narrVoices=['onyx','sage','fable'];
@@ -294,8 +309,16 @@ function renderScript(){
  let box=document.getElementById('scriptList'); box.innerHTML='';
  currentScript.forEach((c,i)=>{
   let div=document.createElement('div'); div.className='line-card';
-  div.innerHTML=`<div class="flex justify-between items-center"><span class="text-[10px] font-black">${i+1}. ${c.speaker}</span><div class="flex gap-2"><span class="direction-tag">${c.direction}</span><button onclick="editLine(${i})" class="direction-auto">✏️</button></div></div><p class="text-[12px] mt-2 dev">${c.dialogue}</p><div id="edit-${i}" class="edit-panel hidden"><select id="dir-${i}" class="input-dark w-full p-2 text-[9px]">${EMOTION_OPTIONS.map(e=>`<option ${e===c.direction?'selected':''}>${e}</option>`).join('')}</select><div class="flex gap-2 mt-2"><button onclick="saveEdit(${i})" class="btn-primary flex-1 py-2 text-[9px]">💾 Save & Close</button><button onclick="cancelEdit(${i})" class="btn-ghost flex-1 py-2 text-[9px]">✕ Cancel</button></div></div>`;
+  div.innerHTML=`<div class="flex justify-between items-center"><span class="text-[10px] font-black">${i+1}. ${c.speaker}</span><div class="flex gap-2 items-center"><span class="direction-tag">${c.direction}</span><span class="text-[8px] bg-[#2a1f4a] px-2 py-1 rounded-full border border-[#3d2f68]">${c.intensity||60}%</span><button onclick="playLine(${i}, false)" class="bg-[#8b5cf6] text-white px-3 py-1 rounded-full text-[9px] font-black">▶️ PLAY</button><button onclick="editLine(${i})" class="direction-auto">✏️</button></div></div><p class="text-[12px] mt-2 dev">${c.dialogue}</p><div class="mt-2 flex items-center gap-2"><input type="range" min="0" max="100" value="${c.intensity||60}" data-line="${i}" class="line-intensity w-full" style="accent-color:#ec4899"><span class="text-[8px] w-8">${c.intensity||60}%</span><button onclick="playLine(${i}, false)" class="text-[9px] bg-[#ec4899]/20 border border-[#ec4899] px-2 py-1 rounded-full">🔊</button></div><div id="edit-${i}" class="edit-panel hidden"><select id="dir-${i}" class="input-dark w-full p-2 text-[9px]">${EMOTION_OPTIONS.map(e=>`<option ${e===c.direction?'selected':''}>${e}</option>`).join('')}</select><div class="flex gap-2 mt-2"><button onclick="saveEdit(${i})" class="btn-primary flex-1 py-2 text-[9px]">💾 Save & Close</button><button onclick="cancelEdit(${i})" class="btn-ghost flex-1 py-2 text-[9px]">✕ Cancel</button></div></div>`;
   box.appendChild(div);
+ });
+ // bind line intensity
+ document.querySelectorAll('.line-intensity').forEach(sl=>{
+   sl.addEventListener('input', e=>{
+     let idx=parseInt(e.target.getAttribute('data-line'));
+     currentScript[idx].intensity=parseInt(e.target.value);
+     e.target.nextElementSibling.textContent=e.target.value+'%';
+   });
  });
 }
 function editLine(i){ document.getElementById(`edit-${i}`).classList.remove('hidden'); }
@@ -352,11 +375,11 @@ function previewThreeVoices(sp){
 }
 
 async function playLine(i,save=true){
- let s=currentScript[i]; let voiceId=speakerVoiceMap[s.speaker]||'alloy'; let text=s.dialogue; let instruction=buildInstruction(s.speaker, s.direction);
+ let s=currentScript[i]; let voiceId=speakerVoiceMap[s.speaker]||'alloy'; let text=s.dialogue; let instruction=buildInstruction(s.speaker, s.direction, s.intensity);
  let key=getKey(); if(!key){toggleApiBox(); throw new Error('no key');}
  let body={model:'gpt-4o-mini-tts', voice:voiceId, input:text, instructions:instruction};
  let r=await fetch('https://api.openai.com/v1/audio/speech',{method:'POST',headers:{'Authorization':'Bearer '+key,'Content-Type':'application/json'},body:JSON.stringify(body)});
- if(!r.ok){ let fb=await fetch('https://api.openai.com/v1/audio/speech',{method:'POST',headers:{'Authorization':'Bearer '+key,'Content-Type':'application/json'},body:JSON.stringify({model:'tts-1-hd', voice:voiceId, input:text, speed:1.0})}); let blob=await fb.blob(); let url=URL.createObjectURL(blob); if(save){audioBlobs.push({url,blob}); audioUrls.push(url);} let container=document.getElementById('audioPlayers'); let div=document.createElement('div'); div.className='audio-item'; div.innerHTML=`<span class="text-[9px] font-black">${i+1}. ${s.speaker} (${s.direction})</span><audio controls src="${url}" class="w-full mt-1 h-[28px]"></audio>`; container.appendChild(div); return {url,blob}; }
+ if(!r.ok){ let fb=await fetch('https://api.openai.com/v1/audio/speech',{method:'POST',headers:{'Authorization':'Bearer '+key,'Content-Type':'application/json'},body:JSON.stringify({model:'tts-1-hd', voice:voiceId, input:text, speed:getSpeedForIntensity(speaker||s?.speaker||voiceId)})}); let blob=await fb.blob(); let url=URL.createObjectURL(blob); if(save){audioBlobs.push({url,blob}); audioUrls.push(url);} let container=document.getElementById('audioPlayers'); let div=document.createElement('div'); div.className='audio-item'; div.innerHTML=`<span class="text-[9px] font-black">${i+1}. ${s.speaker} (${s.direction})</span><audio controls src="${url}" class="w-full mt-1 h-[28px]"></audio>`; container.appendChild(div); return {url,blob}; }
  let blob=await r.blob(); let url=URL.createObjectURL(blob);
  if(save){audioBlobs.push({url,blob}); audioUrls.push(url);}
  let container=document.getElementById('audioPlayers'); let div=document.createElement('div'); div.className='audio-item'; div.innerHTML=`<span class="text-[9px] font-black text-green-400">✅ ${i+1}. ${s.speaker} (${s.direction})</span><audio controls src="${url}" class="w-full mt-1 h-[28px]"></audio>`; container.appendChild(div); return {url,blob};
@@ -392,7 +415,7 @@ async function playLinePreview(i){
   try{
     let s=currentScript[i];
     let voiceId=speakerVoiceMap[s.speaker]||'alloy';
-    let instruction=buildInstruction(s.speaker, s.direction);
+    let instruction=buildInstruction(s.speaker, s.direction, s.intensity);
     let key=getKey(); if(!key){toggleApiBox(); alert('Add API key first'); return;}
     let status=document.getElementById('directorResult');
     if(status){ status.textContent=`🔊 Testing ${s.speaker} with ${voiceId}...`; status.classList.remove('hidden'); }
