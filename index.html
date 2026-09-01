@@ -197,6 +197,30 @@ function autoDetect(){
   try{
     let rawLines=src.split('\n');
     rawLines.forEach(rawLine=>{
+      // V28.2 MIXED SPLITTER - handle: राम ने ... कहा - "dialogue"
+      let mixed = rawLine.trim().match(/^(.+?ने.+?(?:कहा|बोली|बोला|पूछा|चिल्लाई|चिल्लाया|जवाब दिया|फुसफुसाया))\s*[-—–:]\s*["'“”‘’]?(.*?)["'“”‘’]?\s*$/);
+      if(mixed){
+        let act = mixed[1].trim();
+        let dlg = mixed[2].trim();
+        // push narrator action
+        if(act){
+          if(!speakers.includes('Narrator')) speakers.push('Narrator');
+          let eDir=smartEmotionFromText(act, act);
+          currentScript.push({speaker:'Narrator',direction:eDir,dialogue:act.endsWith('।')?act:act+'।',raw:act});
+        }
+        if(dlg){
+          // extract speaker name from action: first word
+          let firstWord = act.split(/\s+/)[0].replace(/[""“”':\-\*]+/g,'').trim();
+          let spName = firstWord;
+          // gender check
+          if(spName && spName.length>=2){
+            if(!speakers.includes(spName)) speakers.push(spName);
+            let eDir2=smartEmotionFromText(dlg, dlg);
+            currentScript.push({speaker:spName,direction:eDir2,dialogue:dlg,raw:dlg});
+          }
+        }
+        return;
+      }
       let line=rawLine.trim(); if(!line) return;
       let cleanLine=line.replace(/^\*\*|\*\*$/g,'').trim(); if(!cleanLine||cleanLine.length<2) return;
       let sp=null, dlg=null, dir='';
