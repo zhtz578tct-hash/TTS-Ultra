@@ -367,38 +367,102 @@ function intensityFromEmotion(dir){
 }
 
 var currentAccent = localStorage.getItem('accent') || 'Banarasi + Bhojpuri';
+
 function buildInstructionV289(speaker, direction, lineInt){
   let intensity = (lineInt!==undefined) ? lineInt : (speakerIntensityMap[speaker]!==undefined ? speakerIntensityMap[speaker] : 70);
   let isFemale = speakerGenderMap[speaker]==='female';
-  let affect='';
   let d=(direction||'').toLowerCase();
-  if(d.includes('डरी')) affect='terrified, trembling, scared';
-  else if(d.includes('रोते')) affect='crying, sobbing, tearful';
-  else if(d.includes('गुस्से')||d.includes('डाँट')) affect='angry, furious, shouting, harsh';
-  else if(d.includes('खुशी')||d.includes('हँस')) affect='joyful, laughing, cheerful';
-  else if(d.includes('प्यार')) affect='loving, soft, romantic, intimate';
-  else if(d.includes('सवालिया')) affect='curious, questioning';
-  else if(d.includes('जोश')) affect='excited, energetic, loud';
-  else if(d.includes('फुसफुसा')||d.includes('धीरे')) affect='whispering, soft, breathy';
-  else affect='natural, expressive';
+  
+  // Base emotion affects - very detailed for gpt-4o-mini-tts
+  let affect='';
+  let breath='';
+  let pace='';
+  
+  if(d.includes('डरी') || d.includes('डर')){
+    affect='terrified, trembling voice, shaky, fearful, anxious, voice cracking with fear';
+    breath='with shaky breaths, gasping slightly';
+    pace='slow, hesitant, pausing with fear';
+  }
+  else if(d.includes('रोते') || d.includes('रो')){
+    affect='crying, sobbing, tearful, choked up, voice breaking, sniffling, sad, heartbroken';
+    breath='with sobbing breaths, choked voice, tears in voice';
+    pace='slow, broken speech, pauses between words, emotional';
+  }
+  else if(d.includes('गुस्से') || d.includes('गुस्सा') || d.includes('डाँटते') || d.includes('डाँट')){
+    affect='angry, furious, shouting, harsh, aggressive, stern, raging, intense anger';
+    breath='with heavy angry breathing, forceful';
+    pace='fast, sharp, loud, powerful projection';
+  }
+  else if(d.includes('खुशी') || d.includes('हँसते') || d.includes('हँस')){
+    affect='joyful, laughing, cheerful, bright, happy, giggling, excited happiness';
+    breath='with light happy breaths, smiling voice';
+    pace='medium-fast, bouncy, lively';
+  }
+  else if(d.includes('प्यार') || d.includes('शर्मा')){
+    affect='loving, soft, romantic, intimate, tender, affectionate, warm, gentle whisper of love';
+    breath='with soft intimate breaths, close mic, breathy';
+    pace='slow, soft, tender, intimate';
+  }
+  else if(d.includes('सवालिया') || d.includes('आश्चर्य')){
+    affect='curious, questioning, surprised, wondering, rising intonation, inquisitive';
+    breath='with curious breath';
+    pace='medium, questioning rise at end';
+  }
+  else if(d.includes('जोश') || d.includes('उत्साह') || d.includes('वाह')){
+    affect='excited, energetic, enthusiastic, thrilled, loud, powerful, full of energy';
+    breath='with energetic breaths';
+    pace='fast, enthusiastic, dynamic';
+  }
+  else if(d.includes('फुसफुसा') || d.includes('धीरे') || d.includes('सो गई')){
+    affect='whispering, soft, breathy, quiet, secretive, intimate whisper, hushed';
+    breath='barely audible whisper, breathy, close mic';
+    pace='very slow, hushed, secretive';
+  }
+  else if(d.includes('चिंता')){
+    affect='worried, anxious, concerned, tense, nervous';
+    breath='with anxious breath';
+    pace='slightly fast, worried';
+  }
+  else {
+    affect='natural, expressive, calm, clear, emotional';
+    breath='natural breathing';
+    pace='natural pace';
+  }
 
+  // Volume layer from intensity - overrides
   let volume='';
-  if(intensity<=15) volume='AFFECT: barely audible whisper, breathy, extremely quiet, slow';
-  else if(intensity<=35) volume='AFFECT: soft whisper, gentle, low volume, slow';
-  else if(intensity<=65) volume='AFFECT: normal conversational, expressive, clear';
-  else if(intensity<=85) volume='AFFECT: loud, powerful, energetic, fast';
-  else volume='AFFECT: SHOUTING LOUDLY, yelling, extremely loud, very fast, screaming';
+  if(intensity<=10){
+    volume='AFFECT: EXTREMELY QUIET barely audible whisper, intimate secret, breathy, close mic, like speaking into ear, very slow, private';
+  }
+  else if(intensity<=25){
+    volume='AFFECT: soft whisper, gentle, tender, low volume, slow, caring, intimate';
+  }
+  else if(intensity<=40){
+    volume='AFFECT: soft spoken, calm, gentle, quiet conversation, slow, tender';
+  }
+  else if(intensity<=65){
+    volume='AFFECT: normal conversational volume, expressive, clear, natural pace, warm';
+  }
+  else if(intensity<=85){
+    volume='AFFECT: loud, powerful, strong projection, energetic, slightly fast, intense, clear';
+  }
+  else {
+    volume='AFFECT: SHOUTING VERY LOUDLY, yelling at top of voice, extremely loud, screaming with full power, very fast, high energy, forceful';
+  }
 
-  return `Voice Affect: ${volume}, ${affect}. You are ${speaker} (${isFemale?'female':'male'}). Speak only dialogue with this emotion. Hindi ${(typeof currentAccent!=='undefined'?currentAccent:'Banarasi + Bhojpuri')||'Banarasi'} accent. Act, don't describe.`;
+  // Final instruction - gpt-4o-mini-tts loves this detailed format
+  return `Voice Affect: ${volume}. Emotion: ${affect}. Breathing: ${breath}. Pace: ${pace}. You are ${speaker} (${isFemale?'female, feminine voice':'male, masculine voice'}). Speak ONLY the dialogue, act the emotion with your voice, don't say emotion words. Add natural pauses for crying or fear if needed. Language: Hindi, accent: ${window.currentAccent||'Banarasi + Bhojpuri'} with natural भौकाल, warm, human. Dialogue must sound like real human feeling this emotion.`;
 }
 
 function getSpeedForIntensityV289(intensity){
-  if(intensity<=20) return 0.85;
-  if(intensity<=40) return 0.95;
+  if(intensity<=15) return 0.78;
+  if(intensity<=30) return 0.88;
+  if(intensity<=50) return 0.95;
   if(intensity<=70) return 1.0;
-  if(intensity<=85) return 1.1;
-  return 1.2;
+  if(intensity<=85) return 1.08;
+  return 1.18;
 }
+
 
 // Override playLine with working version
 async function playLineV289(i, save=true){
