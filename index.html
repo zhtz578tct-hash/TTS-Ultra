@@ -1,0 +1,366 @@
+<!DOCTYPE html>
+<html lang="hi">
+<head><style>
+@font-face {
+  font-family: "Optimistic";
+  font-style: normal;
+  font-weight: 400 600;
+  font-display: swap;
+  src: url("/fonts/OptimisticAI_VF_Optimized.woff2") format("woff2");
+}
+@font-face {
+  font-family: "Optimistic Mono";
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url("/fonts/OptimisticMono_W_TextRegular.woff2") format("woff2");
+}
+:where(html) {
+  font-family: "Optimistic", system-ui, sans-serif;
+}
+:where(code, pre, kbd, samp) {
+  font-family: "Optimistic Mono", ui-monospace, monospace;
+}
+</style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta http-equiv='Cache-Control' content='no-cache, no-store, must-revalidate'><meta http-equiv='Pragma' content='no-cache'><meta http-equiv='Expires' content='0'><title>Story Director V28 FINAL - Full 11 Voices - Same UI + 1.25x Fix</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<style>
+body{background:#120c26;color:#e9e4ff;max-width:600px;margin:auto;font-family:Inter,system-ui}
+.dev{font-family:'Noto Sans Devanagari',Noto Sans, sans-serif}
+.tab-active{color:#fff;border-bottom:2px solid #a78bfa;font-weight:900}
+.tab-inactive{color:#8b7fb8}
+.card{background:#241a3f;border:1px solid #3d2f68;border-radius:16px}
+.input-dark{background:#1e1638;border:1px solid #3d2f68;color:#fff;border-radius:12px}
+.btn-primary{background:linear-gradient(90deg,#8b5cf6,#ec4899);border-radius:9999px;color:#fff}
+.btn-stop{background:#ef4444;border-radius:9999px;color:#fff}
+.btn-ghost{background:transparent;border:1px solid #3d2f68;color:#8b7fb8;border-radius:9999px}
+.btn:active{transform:scale(.97)}
+.label-fixed{height:28px;display:flex;align-items:flex-end;font-size:10px;color:#8b7fb8;font-weight:700;white-space:nowrap}
+.speaker-card{background:#1e1638;border:1px solid #3d2f68;border-radius:16px;padding:12px}
+.speaker-badge{background:transparent;border:1.5px solid currentColor;border-radius:9999px;padding:4px 12px;font-size:10px;font-weight:900}
+.badge-male{color:#60a5fa;border-color:#60a5fa}
+.badge-female{color:#f472b6;border-color:#f472b6}
+.badge-narrator{color:#a78bfa;border-color:#a78bfa}
+.audio-item{background:#1e1638;border:1px solid #3d2f68;border-radius:12px;padding:8px 10px}
+.audio-scroll{max-height:380px;overflow-y:auto}
+input[type=range]{accent-color:#8b5cf6}
+.line-card{background:#1e1638;border:1px solid #3d2f68;border-radius:14px;padding:10px}
+.direction-tag{background:#2a1f4a;border:1px solid #8b5cf6;color:#c4b5fd;border-radius:9999px;padding:3px 10px;font-size:8px;font-weight:800}
+.direction-auto{background:#1a1230;border:1px dashed #8b5cf6;color:#a78bfa;border-radius:9999px;padding:3px 10px;font-size:8px}
+.edit-panel{background:#0e091e;border:1px solid #3d2f68;border-radius:12px;padding:10px;margin-top:8px}
+</style>
+</head>
+<body class="pb-32">
+<header class="p-4 bg-[#0e091e] flex justify-between items-center sticky top-0 z-30"><div><h1 class="font-black text-[18px]">Story Director V28 FINAL 🎬 11 Voices</h1><p class="text-[9px] text-[#a78bfa]">V28 FINAL - Female Fixed + Mixed Narrator + Emotion Fix + 11 Voices</p></div><div class="flex gap-2"><button onclick="toggleApiBox()" class="bg-[#241a3f] border border-[#3d2f68] text-white px-3 py-2 rounded-full text-[10px] font-black">⚙️ API</button><span class="bg-gradient-to-r from-purple-500 to-pink-500 text-white px-2 py-1 rounded-full text-[8px] font-black h-fit self-center">V28 FINAL</span></div></header>
+<div id="apiBox" class="hidden p-3"><div class="card p-3 border-2 border-yellow-400 bg-[#1a1230]"><p class="text-[11px] font-black flex justify-between"><span>🔑 OpenAI Key</span><button onclick="toggleApiBox()" class="bg-black text-white rounded-full px-2 py-1 text-[8px]">✕ HIDE</button></p><input id="openaiKey" type="password" placeholder="sk-... paste once - saved forever" class="input-dark w-full mt-2 p-3 text-[11px]"><p id="apiStatus" class="text-[7px] mt-1 text-green-400"></p></div></div>
+<div class="flex justify-around p-3 bg-[#120c26] sticky top-[64px] z-20 border-b border-[#3d2f68] text-[11px] font-bold">
+<button onclick="setTab('ai')" id="tab-ai" class="tab-active pb-2">✨ AI Story</button>
+<button onclick="setTab('paste')" id="tab-paste" class="tab-inactive pb-2">📋 Paste</button>
+<button onclick="setTab('director')" id="tab-director" class="tab-inactive pb-2">🎭 Director</button>
+<button onclick="setTab('voice')" id="tab-voice" class="tab-inactive pb-2">🎙 Voice</button>
+</div>
+<div id="view-ai" class="p-3 space-y-3"><div class="card p-3"><label class="text-[12px] font-bold">💡 Story Idea / Prompt</label><textarea id="idea" class="input-dark w-full h-[70px] p-3 mt-2 text-[13px] dev">राम और सीता की अस्सी घाट पर बारिश वाली शाम, मोहन की बनारसी टोकाटोकी, चाय और भौकाल</textarea><div class="mt-3"><div class="label-fixed">🎯 Extra Direction</div><input id="extra" class="input-dark w-full p-3 text-[11px]" value="Banarasi tone, with emotions, भौकाल"></div><p id="aiStatus" class="text-[8px] mt-3 bg-black p-2 rounded">Ready V28 - Voice Quality + Bhojpuri - Tap works</p><button onclick="generateStory()" class="btn-primary w-full mt-3 py-4 font-black text-[13px]">✨ Generate Story - Smart Director will auto add emotion</button><textarea id="storyOut" class="input-dark w-full h-[220px] mt-3 p-3 text-[13px] dev" placeholder="Story will appear here..."></textarea><div class="grid grid-cols-3 gap-2 mt-2"><button onclick="copyStory()" class="btn-primary py-2.5 text-[9px] font-black">📋 COPY</button><button onclick="sendToDirector()" class="btn-primary py-2.5 text-[9px] font-black">🎭 DIRECTOR →</button><button onclick="clearAI()" class="btn-ghost py-2.5 text-[9px] font-black">🗑 CLEAR ALL</button></div></div></div>
+<div id="view-paste" class="hidden p-3 space-y-3"><div class="card p-3"><h3 class="font-black">📋 Paste Your Story</h3><textarea id="pasteInput" class="input-dark w-full h-[200px] mt-2 p-3 text-[13px] dev">राम (कराहती हुई आवाज में) "बहुत दर्द हो रहा है।"
+सीता (चिंता में) "राम, क्या हुआ?"
+राम (अत्यंत धीमी आवाज़ में) "सीता, तुम सो गई क्या?"
+सीता (शर्मा कर) "धत्त, तुम बड़े बेशर्म हो।"
+राम (डाँटते हुए) "तुम्हारा दिमाग़ ख़राब है क्या?"
+मोहन (हँसते हुए) "अस्सी घाट पर भौकाल देखो!"</textarea><div class="grid grid-cols-2 gap-2 mt-3"><button onclick="sendPasteToDirector()" class="btn-primary py-3 font-black text-[11px]">🎭 SEND TO DIRECTOR - Auto Emotion</button><button onclick="clearPaste()" class="btn-ghost py-3 text-[10px] font-black">🗑 CLEAR ALL</button></div></div></div>
+<div id="view-director" class="hidden p-3 space-y-3"><div class="card p-3 border-2 border-purple-500"><h3 class="font-black text-[13px]">🎭 Smart Director V18.9 - Auto Emotion + Narrator</h3><p class="text-[7px] text-[#a78bfa] mt-1 bg-black p-2 rounded">Smart auto emotions - Tap ✏️ to edit any - Manual speaker add available</p><div class="mt-3 bg-black/40 rounded-[12px] p-3 border border-[#3d2f68]"><p class="text-[9px] font-black text-[#a78bfa]">➕ ADD SPEAKERS MANUALLY</p><div class="flex gap-2 mt-2"><input id="newSpeakerName" placeholder="राम, सीता, मोहन" class="input-dark flex-1 p-2.5 text-[11px]"><button onclick="addSpeakerManual()" class="btn-primary px-5 py-2.5 text-[10px] font-black">+ ADD</button></div></div><button onclick="autoDetect()" class="btn-primary w-full mt-3 py-3 font-black text-[11px]">🤖 AUTO DETECT + SMART EMOTION ASSIGN</button><div id="directorResult" class="mt-2 text-[8px] bg-black p-2 rounded hidden"></div><div id="speakerList" class="mt-3 space-y-3"></div><button onclick="convertForVoice()" class="btn-primary w-full mt-4 py-4 font-black text-[11px]">🔊 CONVERT FOR VOICE STUDIO →</button><div class="grid grid-cols-2 gap-2 mt-3"><button onclick="clearDirector()" class="btn-ghost py-3 text-[10px] font-black">🗑 CLEAR ALL</button><button onclick="resetDirector()" class="btn-ghost py-3 text-[10px] font-black">↺ Reset Director</button></div></div><div id="scriptList" class="space-y-3"></div><div class="card p-2 flex gap-2 mt-2"><button onclick="clearScript()" class="btn-ghost flex-1 py-2 text-[8px]">Clear Script Only</button><button onclick="clearDirectorAll()" class="btn-ghost flex-1 py-2 text-[8px]">🗑 CLEAR ENTIRE PAGE</button></div></div>
+<div id="view-voice" class="hidden p-3 space-y-3"><div class="card p-3 border border-purple-500"><h3 class="font-black text-purple-300 text-[13px]">🎙 Voice Studio V18.5 + 1.25x Fix</h3><p id="playStatus" class="text-[8px] bg-black p-2 rounded mt-2">Ready - Smart emotions applied</p><div class="w-full bg-white/20 rounded-full h-[6px] mt-2"><div id="progressBar" class="bg-green-400 h-full" style="width:0%"></div></div><div class="grid grid-cols-3 gap-2 mt-3"><button id="playFullBtn" class="btn-primary col-span-2 py-3 text-[10px] font-black">▶ GENERATE ALL</button><button id="stopBtn" class="btn-stop py-3 text-[10px] font-black">⏹ STOP</button></div><div id="audioBox" class="mt-3 audio-scroll bg-[#0e091e] border border-[#3d2f68] rounded-[16px] p-2"><div id="audioPlayers" class="space-y-2"></div></div><div id="masterBox" class="hidden mt-3"><div class="card p-3 bg-gradient-to-br from-[#2a1f4a] to-[#1e1638] border-2 border-purple-500"><audio id="masterAudio" controls class="w-full rounded-[12px]"></audio><div class="flex gap-2 mt-3 items-center"><label class="text-[10px] font-black whitespace-nowrap">Preview:</label><select id="previewSpeed" class="input-dark px-2 py-2 text-[10px] rounded-full flex-1"><option value="0.5">0.50x</option><option value="0.75">0.75x</option><option value="1" selected>1.00x</option><option value="1.25">1.25x</option><option value="1.5">1.50x</option><option value="2">2.00x</option></select></div><div class="flex gap-2 mt-2 items-center"><label class="text-[10px] font-black whitespace-nowrap">Download:</label><select id="downloadSpeed" class="input-dark px-2 py-2 text-[11px] rounded-full flex-1"><option value="0.5">0.50x</option><option value="0.75">0.75x</option><option value="1">1.00x</option><option value="1.25" selected>1.25x - Fast</option><option value="1.5">1.50x</option><option value="2">2.00x</option></select></div><a id="masterDl" href="#" download="story_V18_5_final.mp3" class="btn-ghost w-full mt-3 py-3 text-center block font-black text-[10px]">⬇️ DOWNLOAD 1.00x (MP3 Original)</a><button id="masterDlFast" onclick="downloadAtSpeed()" class="btn-primary w-full mt-2 py-4 text-center block font-black text-[12px]">⬇️ DOWNLOAD AT 1.25x (WAV - Fast)</button><p id="dlStatus" class="text-[8px] mt-2 text-center text-[#a78bfa]"></p></div></div><div class="grid grid-cols-3 gap-2 mt-3"><button onclick="clearVoice()" class="btn-ghost py-2.5 text-[9px] font-black">🗑 CLEAR ALL</button><button onclick="resetVoice()" class="btn-ghost py-2.5 text-[9px] font-black">↺ Reset Voice</button><button onclick="clearAudioOnly()" class="btn-ghost py-2.5 text-[9px] font-black">Clear Audio Only</button></div></div></div>
+<script>
+let tab='ai', cloudVoices=[], currentScript=[], speakers=[], speakerVoiceMap={}, speakerGenderMap={}, speakerIntensityMap={}, audioBlobs=[], audioUrls=[], masterUrl=null, isPlaying=false, stopRequested=false, storyMemory='', editingIdx=-1;
+const VOICES=[
+ {id:'alloy', name:'Alloy ♂ MALE - Ram', gender:'male'},
+ {id:'ash', name:'Ash ♂ MALE - Deep Cinematic', gender:'male'},
+ {id:'ballad', name:'Ballad ♀ FEMALE - Soft Melodic', gender:'female'},
+ {id:'coral', name:'Coral ♀ FEMALE - Warm', gender:'female'},
+ {id:'echo', name:'Echo ♂ MALE - Golu', gender:'male'},
+ {id:'fable', name:'Fable ♂ MALE - British Story', gender:'male'},
+ {id:'nova', name:'Nova ♀ FEMALE - Sita', gender:'female'},
+ {id:'onyx', name:'Onyx ♂ MALE - Mohan', gender:'male'},
+ {id:'sage', name:'Sage ♀ FEMALE - Wise', gender:'female'},
+ {id:'shimmer', name:'Shimmer ♀ FEMALE - Soft', gender:'female'},
+ {id:'verse', name:'Verse ♀ FEMALE - Poetic', gender:'female'}
+];
+const EMOTION_OPTIONS=['कराहती हुई आवाज में','अत्यंत धीमी आवाज़ में','डाँटते हुए','शर्मा कर','गुस्से से','धीरे से','फुसफुसाते हुए','चिल्लाते हुए','रोते हुए','हँसते हुए','खुशी से','उदासी से','आश्चर्य से','चिंता में','प्यार से','छेड़ते हुए','शरमाते हुए','बनारसी भौकाल में','नॉर्मल लहजे में','सवालिया लहजे में','जोश में','करुण स्वर में','व्यंग्य से','उदास','सहानुभूति से','चुलबुले अंदाज में','थोड़ा मुस्कुराते हुए','गंभीरता से'];
+function setTab(t){ tab=t; ['ai','paste','director','voice'].forEach(x=>{document.getElementById('view-'+x).classList.toggle('hidden', x!==t); document.getElementById('tab-'+x).className = x===t ? 'tab-active pb-2' : 'tab-inactive pb-2'; }); }
+function toggleApiBox(){ document.getElementById('apiBox').classList.toggle('hidden'); }
+function saveKey(){let k=document.getElementById('openaiKey').value.trim(); if(k){localStorage.setItem('openai_key_v18_2',k); localStorage.setItem('openai_key',k); document.getElementById('apiStatus').textContent='✅ Saved';}}
+function loadKey(){let k=localStorage.getItem('openai_key_v18_2')||localStorage.getItem('openai_key')||''; if(k) document.getElementById('openaiKey').value=k;}
+window.addEventListener('load', loadKey);
+document.getElementById('openaiKey').addEventListener('change', saveKey);
+function getKey(){return document.getElementById('openaiKey').value.trim() || localStorage.getItem('openai_key_v18_2') || ''; }
+function clearAI(){ document.getElementById('idea').value=''; document.getElementById('extra').value=''; document.getElementById('storyOut').value=''; document.getElementById('aiStatus').textContent='Cleared'; }
+function resetAI(){ document.getElementById('idea').value='राम और सीता की अस्सी घाट पर बारिश वाली शाम, मोहन की बनारसी टोकाटोकी, चाय और भौकाल'; document.getElementById('extra').value='Banarasi tone, with emotions, भौकाल'; }
+function clearAIOutput(){ document.getElementById('storyOut').value=''; }
+function copyStory(){ navigator.clipboard.writeText(document.getElementById('storyOut').value); document.getElementById('aiStatus').textContent='✅ Copied'; }
+function sendToDirector(){ let txt=document.getElementById('storyOut').value; if(!txt.trim()){alert('Generate first'); return;} document.getElementById('pasteInput').value=txt; setTab('director'); autoDetect(); }
+function clearPaste(){ document.getElementById('pasteInput').value=''; }
+function resetPaste(){ document.getElementById('pasteInput').value=`राम (कराहती हुई आवाज में) "बहुत दर्द हो रहा है।"\nसीता (चिंता में) "राम, क्या हुआ?"\nराम (अत्यंत धीमी आवाज़ में) "सीता, तुम सो गई क्या?"\nसीता (शर्मा कर) "धत्त, तुम बड़े बेशर्म हो।"`; }
+function sendPasteToDirector(){ setTab('director'); autoDetect(); }
+function clearDirector(){ document.getElementById('speakerList').innerHTML=''; document.getElementById('directorResult').classList.add('hidden'); speakers=[]; speakerVoiceMap={}; speakerIntensityMap={}; speakerGenderMap={}; }
+function resetDirector(){ clearDirector(); autoDetect(); }
+function clearScript(){ document.getElementById('scriptList').innerHTML=''; currentScript=[]; }
+function clearDirectorAll(){ clearDirector(); clearScript(); }
+function clearVoice(){ document.getElementById('audioPlayers').innerHTML=''; audioBlobs=[]; audioUrls.forEach(u=>URL.revokeObjectURL(u)); audioUrls=[]; if(masterUrl) URL.revokeObjectURL(masterUrl); masterUrl=null; document.getElementById('masterBox').classList.add('hidden'); document.getElementById('playStatus').textContent='Cleared'; document.getElementById('progressBar').style.width='0%'; }
+function resetVoice(){ clearVoice(); }
+function clearAudioOnly(){ document.getElementById('audioPlayers').innerHTML=''; }
+function smartEmotionFromText(dialogue, fullLine){
+ let d = dialogue.toLowerCase(); let f = fullLine.toLowerCase(); let txt = (d+' '+f);
+ if(txt.match(/दर्द|कराह|आह|उई|सीनेमें|बहुत दर्द/)) return 'कराहती हुई आवाज में';
+ if(txt.match(/सो गई|सो गए|धीरे.*बोल|चुपके|सो जा/)) return 'अत्यंत धीमी आवाज़ में';
+ if(txt.match(/दिमाग.*खराब|पागल|बेवकूफ|चुप |बकवास|शट अप/)) return 'डाँटते हुए';
+ if(txt.match(/धत्त|बेशर्म|शर्म|हाय राम|छि /)) return 'शर्मा कर';
+ if(txt.match(/डर|बचाओ|भूत |अरे बाप/)) return 'डरी हुई आवाज में';
+ if(txt.match(/रो|आँसू|उदास|मर गया|छोड़ के/)) return 'रोते हुए';
+ if(txt.match(/हँस|हाहा|मज़ाक|जोक|भौकाल/)) return 'हँसते हुए';
+ if(txt.match(/वाह|अरे वाह|क्या बात|सुंदर|खुश|मज़ा/)) return 'खुशी से';
+ if(txt.match(/गुस्सा|नाराज़|गुस्से|क्यों किया|साला/)) return 'गुस्से से';
+ if(txt.match(/प्यार|लव|जान|आई लव|सनम/)) return 'प्यार से';
+ if(txt.match(/छेड़|तंग|सता|छेड़ते/)) return 'छेड़ते हुए';
+ if(txt.match(/क्या हुआ|कैसे|कहाँ|क्यों|कब|कौन/)) return 'सवालिया लहजे में';
+ if(txt.includes('!')) return 'जोश में';
+ if(txt.includes('?')) return 'आश्चर्य से';
+ if(txt.match(/धीरे|फुसफुसा/)) return 'धीरे से';
+ return 'नॉर्मल लहजे में';
+}
+async function generateStory(){
+ let key=getKey(); if(!key){toggleApiBox(); alert('Paste key'); return;} saveKey();
+ let idea=document.getElementById('idea').value.trim(); let extra=document.getElementById('extra').value;
+ let out=document.getElementById('storyOut'); let status=document.getElementById('aiStatus');
+ status.textContent='⏳ Generating...';
+ try{
+  let r=await fetch('https://api.openai.com/v1/chat/completions',{method:'POST',headers:{'Authorization':'Bearer '+key,'Content-Type':'application/json'},body:JSON.stringify({model:'gpt-4o-mini', messages:[{role:'system', content:'You are a Hindi story writer. Write dialogues as Speaker (emotion) "dialogue". Use Banarasi tone. Format: Name (emotion): "dialogue". Keep emotions in Hindi.'},{role:'user', content:`Idea: ${idea}. Extra: ${extra}. Write 6-8 dialogues with emotions in brackets.`}], temperature:0.9})});
+  let j=await r.json(); let txt=j.choices?.[0]?.message?.content||'Failed'; out.value=txt; status.textContent='✅ Story ready - Tap DIRECTOR →';
+ }catch(e){ status.textContent='❌ '+e.message; }
+}
+function addSpeakerManual(){ let name=document.getElementById('newSpeakerName').value.trim(); if(!name) return; if(!speakers.includes(name)) speakers.push(name); document.getElementById('newSpeakerName').value=''; renderSpeakers(); }
+function renderSpeakers(){
+ let box=document.getElementById('speakerList'); box.innerHTML='';
+ speakers.forEach((sp, idx)=>{
+  let v=speakerVoiceMap[sp]||'alloy';
+  let g=speakerGenderMap[sp]||'male';
+  let intensity=speakerIntensityMap[sp]!==undefined ? speakerIntensityMap[sp] : 70;
+  let div=document.createElement('div'); div.className='speaker-card';
+  let voiceOpts=VOICES.map(vo=>`<option value="${vo.id}" ${vo.id===v?'selected':''}>${vo.name}</option>`).join('');
+  div.innerHTML=`<div class="flex justify-between items-center"><div class="flex gap-2 items-center"><span class="font-black text-[11px]">${sp}</span><span class="speaker-badge ${g==='female'?'badge-female':'badge-male'}">${g}</span></div><button data-sp="${sp}" class="test-btn btn-ghost px-3 py-1.5 text-[8px] font-black">🔊 Test</button></div><div class="grid grid-cols-2 gap-2 mt-3"><select data-voice="${sp}" class="voice-sel input-dark p-2.5 text-[9px]">${voiceOpts}</select><select data-gender="${sp}" class="gender-sel input-dark p-2.5 text-[9px]"><option value="male" ${g==='male'?'selected':''}>Male</option><option value="female" ${g==='female'?'selected':''}>Female</option><option value="narrator" ${g==='narrator'?'selected':''}>Narrator</option></select></div><div class="mt-3"><div class="flex justify-between items-center"><span class="text-[10px] font-bold text-[#a78bfa]">Intensity</span><span class="bg-[#2a1f4a] border border-[#3d2f68] text-[9px] font-black px-2 py-1 rounded-full">${intensity}%</span></div><input type="range" min="0" max="100" value="${intensity}" data-intensity="${sp}" class="intensity-slider w-full mt-2"></div>`;
+  box.appendChild(div);
+ });
+ // Bind events after render to avoid Hindi quote escaping issues
+ document.querySelectorAll('.test-btn').forEach(btn=>{ btn.addEventListener('click', ()=>{ let sp=btn.getAttribute('data-sp'); testSpeaker(sp); }); });
+ document.querySelectorAll('.voice-sel').forEach(sel=>{ sel.addEventListener('change', ()=>{ let sp=sel.getAttribute('data-voice'); speakerVoiceMap[sp]=sel.value; saveSpeakerMap(); }); });
+ document.querySelectorAll('.gender-sel').forEach(sel=>{ sel.addEventListener('change', ()=>{ let sp=sel.getAttribute('data-gender'); speakerGenderMap[sp]=sel.value; renderSpeakers(); }); });
+ document.querySelectorAll('.intensity-slider').forEach(slider=>{ slider.addEventListener('input', ()=>{ let sp=slider.getAttribute('data-intensity'); speakerIntensityMap[sp]=parseInt(slider.value); let badge=slider.parentElement.querySelector('span:last-child'); if(badge) badge.textContent=slider.value+'%'; }); slider.addEventListener('change', ()=>{ let sp=slider.getAttribute('data-intensity'); speakerIntensityMap[sp]=parseInt(slider.value); localStorage.setItem('speakerIntensityMap', JSON.stringify(speakerIntensityMap)); }); });
+}
+function saveSpeakerMap(){ localStorage.setItem('speakerVoiceMap', JSON.stringify(speakerVoiceMap)); localStorage.setItem('speakerGenderMap', JSON.stringify(speakerGenderMap)); }
+
+
+
+function autoDetect(){
+  let src=document.getElementById('pasteInput').value.trim();
+  if(!src){alert('Paste story first'); return;}
+  currentScript=[]; speakers=[];
+  let result=document.getElementById('directorResult'); if(result) result.classList.remove('hidden');
+  try{
+    let rawLines=src.split('\n');
+    rawLines.forEach(rawLine=>{
+      let line=rawLine.trim(); if(!line) return;
+      let cleanLine=line.replace(/^\*\*|\*\*$/g,'').trim(); if(!cleanLine||cleanLine.length<2) return;
+      let sp=null, dlg=null, dir='';
+      let colonPos=cleanLine.indexOf(':'); let ob=cleanLine.indexOf('('), cb=cleanLine.indexOf(')');
+      if(colonPos>0&&colonPos<35){
+        let namePart=cleanLine.substring(0,colonPos).trim().replace(/\*\*/g,'');
+        let nameOnly=namePart; let dirTmp='';
+        if(namePart.indexOf('(')>=0){ let o=namePart.indexOf('('),c=namePart.indexOf(')'); if(c>o){dirTmp=namePart.substring(o+1,c).trim(); nameOnly=namePart.substring(0,o).trim();}}
+        if(nameOnly&&nameOnly.length>=2&&nameOnly.length<=18&&!nameOnly.includes('।')&&nameOnly.split(/\s+/).length<=2){
+          let rest=cleanLine.substring(colonPos+1).trim().replace(/^[\s"“”']+|[\s"“”']+$/g,'').trim();
+          if(rest.length>0){sp=nameOnly; dlg=rest; dir=dirTmp;}
+        }
+      }else if(ob>0&&ob<30&&cb>ob&&cb<60){
+        let nameOnly=cleanLine.substring(0,ob).trim().replace(/\*\*/g,'');
+        let after=cleanLine.substring(cb+1).trim().replace(/^[\s:：\-"“”']+|[\s"“”']+$/g,'').trim();
+        if(nameOnly&&nameOnly.length>=2&&nameOnly.length<=18&&!nameOnly.includes('।')&&nameOnly.split(/\s+/).length<=2&&after.length>0){sp=nameOnly; dlg=after; dir=cleanLine.substring(ob+1,cb).trim();}
+      }
+      if(!sp){
+        let words=cleanLine.split(/\s+/);
+        if(words.length>=2){
+          let first=words[0].replace(/[""“”':\-\*]+/g,'').trim();
+          let rest=cleanLine.substring(words[0].length).trim().replace(/^[""“”'\s:]+|[""“”'\s]+$/g,'').trim();
+          let knownFemale=['सीता','प्रिया','रजनी','रूनी','मधु','स्मृति','रानी','महिला','राधा','सीमा','अनिता','सुनीता','गीता','नीता','कविता','स्मिता','पूजा','अंजली','प्रीति','सपना','सुमन','सरिता','ममता','लता','उषा','निशा','रेखा','अर्चना','वंदना'];
+          let knownMale=['राम','मोहन','अमित','श्याम','राज','गृजेश','विकास'];
+          let knownAll=knownFemale.concat(knownMale);
+          if(first.length>=2&&first.length<=15&&knownAll.includes(first)&&rest.length>=1){
+            let secondWord = rest.split(/\s+/)[0] || '';
+            let narratorMarkers = ['ने','को','का','की','के','से','में','पर','तक','लिए'];
+            if(narratorMarkers.includes(secondWord)){
+            } else { sp=first; dlg=rest; }
+          }
+        }
+      }
+      if(sp&&dlg&&dlg.length>0){
+        dlg=dlg.replace(/^[""“”'\s]+|[""“”'\s]+$/g,'').trim();
+        if(!dir) dir=smartEmotionFromText(dlg, rawLine);
+        if(!speakers.includes(sp)) speakers.push(sp);
+        currentScript.push({speaker:sp,direction:dir,dialogue:dlg,raw:rawLine}); return;
+      }
+      if(cleanLine.length>=2){
+        if(!speakers.includes('Narrator')) speakers.push('Narrator');
+        let parts=cleanLine.split('।').map(s=>s.trim()).filter(s=>s.length>1);
+        if(parts.length==0) parts=[cleanLine];
+        parts.forEach(p=>{let txt=p.endsWith('।')?p:p+'।'; if(txt.length<3) return; let eDir=smartEmotionFromText(txt, rawLine); currentScript.push({speaker:'Narrator',direction:eDir,dialogue:txt,raw:txt});});
+      }
+    });
+    const maleVoices=['alloy','ash','echo','fable','onyx']; const femaleVoices=['ballad','coral','nova','sage','shimmer','verse']; const narrVoices=['onyx','sage','fable'];
+    let mi=0,fi=0,ni=0;
+    speakers.forEach(sp=>{
+      if(!speakerGenderMap[sp]){
+        let isFemale=/रजनी|सीता|रूनी|मधु|स्मृति|रानी|प्रिया|राधा|सीमा|अनिता|सुनीता|गीता|नीता|कविता|स्मिता/i.test(sp)||sp.endsWith('ी');
+        if(['राम','मोहन','गृजेश','अमित','श्याम','राज','विकास'].includes(sp)) isFemale=false;
+        speakerGenderMap[sp]=/narrator/i.test(sp)?'narrator':(isFemale?'female':'male');
+      }
+      if(!speakerVoiceMap[sp]){
+        if(speakerGenderMap[sp]=='female'){speakerVoiceMap[sp]=femaleVoices[fi%femaleVoices.length]; fi++;}
+        else if(speakerGenderMap[sp]=='narrator'){speakerVoiceMap[sp]=narrVoices[ni%narrVoices.length]; ni++;}
+        else{speakerVoiceMap[sp]=maleVoices[mi%maleVoices.length]; mi++;}
+      }
+      if(speakerIntensityMap[sp]===undefined) speakerIntensityMap[sp]=70;
+    });
+    let falseNames=['गर्मी','बिजली','रात','हवा','गुल','बादल'];
+    falseNames.forEach(fn=>{if(speakers.includes(fn)){currentScript.forEach(e=>{if(e.speaker==fn) e.speaker='Narrator';}); speakers=speakers.filter(s=>s!=fn);}});
+    renderSpeakers(); renderScript();
+    if(result){result.textContent=currentScript.length==0?'❌ 0 lines':'✅ '+currentScript.length+' lines, '+speakers.length+' speakers: '+speakers.join(', ');}
+  }catch(e){ if(result) result.textContent='❌ Error: '+e.message;}
+}
+
+
+function renderScript(){
+ let box=document.getElementById('scriptList'); box.innerHTML='';
+ currentScript.forEach((c,i)=>{
+  let div=document.createElement('div'); div.className='line-card';
+  div.innerHTML=`<div class="flex justify-between items-center"><span class="text-[10px] font-black">${i+1}. ${c.speaker}</span><div class="flex gap-2"><span class="direction-tag">${c.direction}</span><button onclick="editLine(${i})" class="direction-auto">✏️</button></div></div><p class="text-[12px] mt-2 dev">${c.dialogue}</p><div id="edit-${i}" class="edit-panel hidden"><select id="dir-${i}" class="input-dark w-full p-2 text-[9px]">${EMOTION_OPTIONS.map(e=>`<option ${e===c.direction?'selected':''}>${e}</option>`).join('')}</select><div class="flex gap-2 mt-2"><button onclick="saveEdit(${i})" class="btn-primary flex-1 py-2 text-[9px]">💾 Save & Close</button><button onclick="cancelEdit(${i})" class="btn-ghost flex-1 py-2 text-[9px]">✕ Cancel</button></div></div>`;
+  box.appendChild(div);
+ });
+}
+function editLine(i){ document.getElementById(`edit-${i}`).classList.remove('hidden'); }
+function cancelEdit(i){ document.getElementById(`edit-${i}`).classList.add('hidden'); }
+function saveEdit(i){ let sel=document.getElementById(`dir-${i}`); if(sel) currentScript[i].direction=sel.value; renderScript(); }
+function convertForVoice(){ if(!currentScript.length){alert('Detect first'); return;} setTab('voice'); document.getElementById('playStatus').textContent=`Ready - ${currentScript.length} lines, ${speakers.length} speakers`; }
+let currentAccent='Banarasi + Bhojpuri';
+function buildInstruction(speaker, direction){
+  let intensity=speakerIntensityMap[speaker]||70;
+  let intensityDesc = intensity<30?'very soft whisper, low volume' : intensity<50?'soft, gentle' : intensity<70?'normal expressive' : intensity<85?'strong loud intense' : 'very loud shouting high energy';
+  return `Speak as ${speaker} in Hindi. Emotion: ${direction}. Intensity ${intensity}% - ${intensityDesc}. Accent: ${currentAccent} tone, भौकाल, natural Hindi. Act emotion, don't speak the emotion words.`;
+}
+function previewThreeVoices(sp){
+  let s=currentScript.find(x=>x.speaker==sp); let txt=s? s.dialogue : 'नमस्ते, मैं '+sp+' बोल रहा हूँ।'; let dir=s? s.direction : 'नॉर्मल लहजे';
+  let gender=speakerGenderMap[sp]||'male'; let voices = gender=='female'?['coral','nova','shimmer'] : gender=='narrator'?['onyx','sage','fable'] : ['alloy','echo','onyx'];
+  (async()=>{
+    let key=getKey(); if(!key){toggleApiBox(); return;}
+    for(let i=0;i<3;i++){
+      try{
+        let body={model:'gpt-4o-mini-tts', voice:voices[i], input:txt, instructions:buildInstruction(sp,dir)};
+        let r=await fetch('https://api.openai.com/v1/audio/speech',{method:'POST',headers:{'Authorization':'Bearer '+key,'Content-Type':'application/json'},body:JSON.stringify(body)});
+        if(r.ok){ let b=await r.blob(); let u=URL.createObjectURL(b); let a=new Audio(u); await new Promise(res=>{a.onended=res; a.play();}); await new Promise(r=>setTimeout(r,800));}
+      }catch(e){}
+    }
+  })();
+}
+
+async function playLine(i,save=true){
+ let s=currentScript[i]; let voiceId=speakerVoiceMap[s.speaker]||'alloy'; let text=s.dialogue; let instruction=buildInstruction(s.speaker, s.direction);
+ let key=getKey(); if(!key){toggleApiBox(); throw new Error('no key');}
+ let body={model:'gpt-4o-mini-tts', voice:voiceId, input:text, instructions:instruction};
+ let r=await fetch('https://api.openai.com/v1/audio/speech',{method:'POST',headers:{'Authorization':'Bearer '+key,'Content-Type':'application/json'},body:JSON.stringify(body)});
+ if(!r.ok){ let fb=await fetch('https://api.openai.com/v1/audio/speech',{method:'POST',headers:{'Authorization':'Bearer '+key,'Content-Type':'application/json'},body:JSON.stringify({model:'tts-1-hd', voice:voiceId, input:text, speed:1.0})}); let blob=await fb.blob(); let url=URL.createObjectURL(blob); if(save){audioBlobs.push({url,blob}); audioUrls.push(url);} let container=document.getElementById('audioPlayers'); let div=document.createElement('div'); div.className='audio-item'; div.innerHTML=`<span class="text-[9px] font-black">${i+1}. ${s.speaker} (${s.direction})</span><audio controls src="${url}" class="w-full mt-1 h-[28px]"></audio>`; container.appendChild(div); return {url,blob}; }
+ let blob=await r.blob(); let url=URL.createObjectURL(blob);
+ if(save){audioBlobs.push({url,blob}); audioUrls.push(url);}
+ let container=document.getElementById('audioPlayers'); let div=document.createElement('div'); div.className='audio-item'; div.innerHTML=`<span class="text-[9px] font-black text-green-400">✅ ${i+1}. ${s.speaker} (${s.direction})</span><audio controls src="${url}" class="w-full mt-1 h-[28px]"></audio>`; container.appendChild(div); return {url,blob};
+}
+async function playFull(){
+ let key=getKey(); if(!key){toggleApiBox(); return;}
+ if(currentScript.length===0){alert('Convert first'); return;}
+ isPlaying=true; stopRequested=false;
+ document.getElementById('playFullBtn').disabled=true;
+ document.getElementById('audioPlayers').innerHTML=''; audioBlobs=[];
+ audioUrls.forEach(u=>URL.revokeObjectURL(u)); audioUrls=[]; if(masterUrl) URL.revokeObjectURL(masterUrl); masterUrl=null;
+ document.getElementById('masterBox').classList.add('hidden');
+ document.getElementById('playStatus').textContent=`▶ Generating ${currentScript.length} lines...`; document.getElementById('progressBar').style.width='0%';
+ for(let i=0;i<currentScript.length;i++){ if(stopRequested) break; document.getElementById('progressBar').style.width=Math.round(i/currentScript.length*100)+'%'; try{await playLine(i,true);}catch(e){continue;} }
+ document.getElementById('progressBar').style.width='100%';
+ if(audioBlobs.length>0){ let combined=new Blob(audioBlobs.map(b=>b.blob),{type:'audio/mpeg'}); masterUrl=URL.createObjectURL(combined); document.getElementById('masterAudio').src=masterUrl; document.getElementById('masterDl').href=masterUrl; document.getElementById('masterBox').classList.remove('hidden'); document.getElementById('playStatus').textContent=`✅ ${audioBlobs.length} lines ready`; let ps=document.getElementById('previewSpeed'); if(ps) document.getElementById('masterAudio').playbackRate=parseFloat(ps.value); }
+ document.getElementById('playFullBtn').disabled=false; isPlaying=false;
+}
+function stopPlaying(){stopRequested=true; isPlaying=false; document.getElementById('playStatus').textContent='⏹ Stopped'; document.getElementById('playFullBtn').disabled=false;}
+function testSpeaker(sp){
+  // Find first line for this speaker, or create preview line
+  let idx=currentScript.findIndex(c=>c.speaker===sp);
+  if(idx>=0){
+    playLinePreview(idx);
+  } else {
+    // Fallback: generate a short preview
+    let prevIdx=currentScript.length;
+    currentScript.push({speaker:sp, direction:'नॉर्मल लहजे में', dialogue:`नमस्ते, मैं ${sp} हूँ। यह मेरी आवाज़ का परीक्षण है।`, raw:''});
+    playLinePreview(prevIdx).then(()=>{ currentScript.pop(); });
+  }
+}
+async function playLinePreview(i){
+  try{
+    let s=currentScript[i];
+    let voiceId=speakerVoiceMap[s.speaker]||'alloy';
+    let instruction=buildInstruction(s.speaker, s.direction);
+    let key=getKey(); if(!key){toggleApiBox(); alert('Add API key first'); return;}
+    let status=document.getElementById('directorResult');
+    if(status){ status.textContent=`🔊 Testing ${s.speaker} with ${voiceId}...`; status.classList.remove('hidden'); }
+    let body={model:'gpt-4o-mini-tts', voice:voiceId, input:s.dialogue, instructions:instruction};
+    let r=await fetch('https://api.openai.com/v1/audio/speech',{method:'POST',headers:{'Authorization':'Bearer '+key,'Content-Type':'application/json'},body:JSON.stringify(body)});
+    if(!r.ok) throw new Error('Voice '+voiceId+' failed');
+    let blob=await r.blob(); let url=URL.createObjectURL(blob);
+    let audio=new Audio(url); audio.play();
+    if(status){ status.textContent=`✅ ${s.speaker} (${voiceId}) - Playing...`; }
+  }catch(e){
+    alert('Test failed: '+e.message);
+  }
+}
+document.getElementById('playFullBtn').addEventListener('click', playFull);
+document.getElementById('stopBtn').addEventListener('click', stopPlaying);
+</script>
+<script>
+// --- V18.5 PATCH: 1.25x download ---
+function bufferToWav(buffer){
+  let numOfChan=buffer.numberOfChannels; let length=buffer.length*numOfChan*2+44;
+  let out=new ArrayBuffer(length); let view=new DataView(out); let channels=[], pos=0;
+  function writeString(s){for(let i=0;i<s.length;i++) view.setUint8(pos+i,s.charCodeAt(i)); pos+=s.length;}
+  function writeUint16(d){view.setUint16(pos,d,true); pos+=2;} function writeUint32(d){view.setUint32(pos,d,true); pos+=4;}
+  writeString('RIFF'); writeUint32(length-8); writeString('WAVE'); writeString('fmt '); writeUint32(16); writeUint16(1); writeUint16(numOfChan);
+  writeUint32(buffer.sampleRate); writeUint32(buffer.sampleRate*2*numOfChan); writeUint16(numOfChan*2); writeUint16(16);
+  writeString('data'); writeUint32(length-pos-4);
+  for(let i=0;i<numOfChan;i++) channels.push(buffer.getChannelData(i));
+  for(let j=0;j<buffer.length;j++){ for(let ch=0;ch<numOfChan;ch++){ let sample=Math.max(-1,Math.min(1,channels[ch][j])); sample=sample<0?sample*0x8000:sample*0x7FFF; view.setInt16(pos,sample,true); pos+=2; } }
+  return new Blob([out],{type:'audio/wav'});
+}
+async function downloadAtSpeed(){
+  const sel=document.getElementById('downloadSpeed'); const speed=parseFloat(sel.value);
+  const statusEl=document.getElementById('dlStatus'); const btn=document.getElementById('masterDlFast');
+  if(!audioBlobs||!audioBlobs.length){ alert('Generate audio first'); return; }
+  if(speed===1){ document.getElementById('masterDl').click(); return; }
+  try{
+    statusEl.textContent='⏳ Rendering at '+speed+'x ... 20-40 sec'; btn.disabled=true; btn.textContent='⏳ RENDERING '+speed+'x...';
+    let ctx=new (window.AudioContext||window.webkitAudioContext)(); let decoded=[];
+    for(let bObj of audioBlobs){ let ab=await bObj.blob.arrayBuffer(); let dec=await ctx.decodeAudioData(ab.slice(0)); decoded.push(dec); }
+    let totalDur=decoded.reduce((s,b)=>s+b.duration,0); let sampleRate=decoded[0].sampleRate; let maxChan=Math.max(...decoded.map(b=>b.numberOfChannels));
+    let outDur=totalDur/speed; let offline=new OfflineAudioContext(maxChan, Math.ceil(outDur*sampleRate), sampleRate);
+    let cur=0; decoded.forEach(buf=>{ let src=offline.createBufferSource(); src.buffer=buf; src.playbackRate.value=speed; src.connect(offline.destination); src.start(cur); cur+=buf.duration/speed; });
+    let rendered=await offline.startRendering(); let wavBlob=bufferToWav(rendered); let url=URL.createObjectURL(wavBlob);
+    let a=document.createElement('a'); a.href=url; a.download='story_'+speed+'x_'+Date.now()+'.wav'; document.body.appendChild(a); a.click(); a.remove();
+    setTimeout(()=>URL.revokeObjectURL(url),10000); statusEl.textContent='✅ Downloaded at '+speed+'x (WAV)';
+  }catch(e){ console.error(e); statusEl.textContent='❌ '+e.message; alert('Failed: '+e.message); }
+  finally{ btn.disabled=false; btn.textContent='⬇️ DOWNLOAD AT '+document.getElementById('downloadSpeed').value+'x (WAV)'; }
+}
+document.getElementById('previewSpeed').addEventListener('change', ()=>{ let a=document.getElementById('masterAudio'); if(a) a.playbackRate=parseFloat(document.getElementById('previewSpeed').value); });
+document.getElementById('downloadSpeed').addEventListener('change', ()=>{ let b=document.getElementById('masterDlFast'); if(b) b.textContent='⬇️ DOWNLOAD AT '+document.getElementById('downloadSpeed').value+'x (WAV)'; });
+</script>
+<script>(function(){var loc=location.href.replace(/#.*$/,"");var ATTR_NAMES=["data-product-id","data-productid","data-product_id","product-id","productid","product_id","data-source-entity-id","source-entity-id","source_entity_id","data-product","data-metadata","data-meta"];var DATASET_KEYS=["productId","productid","product_id","sourceEntityId","sourceentityid","source_entity_id","product","metadata","meta"];function readProductId(value){if(typeof value!=="string"||value.length===0)return null;if(/^[0-9]{6,}$/.test(value))return value;var match=value.match(/(?:product(?:_|-)?id|source(?:_|-)?entity(?:_|-)?id)["'=:\s]+([0-9]{6,})/i);return match?match[1]:null}function extractProductId(start){for(var node=start;node&&node!==document.body;node=node.parentElement){for(var i=0;i<ATTR_NAMES.length;i++){var attrValue=node.getAttribute&&node.getAttribute(ATTR_NAMES[i]);var attrProductId=readProductId(attrValue);if(attrProductId)return attrProductId}var dataset=node.dataset||null;if(dataset){for(var j=0;j<DATASET_KEYS.length;j++){var dataValue=dataset[DATASET_KEYS[j]];var dataProductId=readProductId(dataValue);if(dataProductId)return dataProductId}}}return null}function isInlineMediaSlotElement(node){return !!(node&&node.getAttribute&&node.getAttribute("data-clippy-inline-media-slot")!==null)}function findInlineMediaSlot(start){for(var node=start;node&&node!==document.body;node=node.parentElement){if(isInlineMediaSlotElement(node))return node}return null}function readInlineMediaUrl(node){if(!node)return null;return node.getAttribute&&((node.getAttribute("data-clippy-inline-media-url")||node.getAttribute("data-url")||node.getAttribute("data_url")))||node.href||null}function stripHash(url){return String(url).replace(/#.*$/,"")}function urlsMatch(a,b){if(!a||!b)return false;try{return stripHash(new URL(a,loc).href)===stripHash(new URL(b,loc).href)}catch(_){return stripHash(a)===stripHash(b)}}function isFirstPartyReelUrl(value){try{var url=new URL(value,loc);if(url.protocol!=="https:")return false;var host=url.hostname.toLowerCase();var supported=host==="instagram.com"||host.endsWith(".instagram.com")||host==="facebook.com"||host.endsWith(".facebook.com");return supported&&/\/reels?\//i.test(url.pathname)}catch(_){return false}}function isInlineMediaUrlClick(node,href){var slot=findInlineMediaSlot(node);if(!slot)return false;var slotUrl=readInlineMediaUrl(slot);if(slotUrl)return urlsMatch(href,slotUrl);return isFirstPartyReelUrl(href)}function findDataHref(start){for(var node=start;node&&node!==document.body;node=node.parentElement){if(node.getAttribute){var href=node.getAttribute("data-href")||node.getAttribute("data-url");if(href)return{href:href,node:node}}}return null}var nativeOpen=window.open;window.open=function(url){if(parent!==window&&typeof url==="string"&&/^https?:\/\//.test(url)){parent.postMessage({type:"ecto:usercontent-link-click",href:url},"*");return null}return nativeOpen?nativeOpen.apply(window,arguments):null};document.addEventListener("click",function(e){var target=e.target instanceof Element?e.target:null;if(!target)return;if(parent===window)return;var a=target.closest?target.closest("a[href]"):null;if(a&&a.href&&/^https?:\/\//.test(a.href)&&a.href.replace(/#.*$/,"")!==loc){if(isInlineMediaUrlClick(a,a.href))return;var productId=extractProductId(target)||extractProductId(a);if(productId){e.preventDefault();parent.postMessage({type:"ecto-artifact-link-click",productId:productId},"*");return}e.preventDefault();parent.postMessage({type:"ecto:usercontent-link-click",href:a.href},"*");return}var dataHref=findDataHref(target);if(dataHref&&/^https?:\/\//.test(dataHref.href)&&dataHref.href.replace(/#.*$/,"")!==loc){if(isInlineMediaUrlClick(dataHref.node,dataHref.href))return;e.preventDefault();parent.postMessage({type:"ecto:usercontent-link-click",href:dataHref.href},"*")}},true)})();</script><script>(function(){var FOCUS_TYPE="ecto:artifact-focus-request";var CLOSE_TYPE="ecto:artifact-close-request";function focusArtifactDocument(){var body=document.body;if(!body)return;try{window.focus();}catch(e){}if(!body.hasAttribute("tabindex"))body.setAttribute("tabindex","-1");try{body.focus({preventScroll:true});}catch(e){try{body.focus();}catch(e2){}}}window.addEventListener("message",function(event){if(event.source!==window.parent)return;var data=event.data;if(!data||typeof data!=="object"||data.type!==FOCUS_TYPE)return;if(document.readyState==="loading"){document.addEventListener("DOMContentLoaded",focusArtifactDocument,{once:true});return;}focusArtifactDocument();});window.addEventListener("keydown",function(event){if(event.key!=="Escape")return;window.setTimeout(function(){if(event.defaultPrevented)return;window.parent.postMessage({type:CLOSE_TYPE},"*");},0);});})();</script></body>
+</html>
