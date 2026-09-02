@@ -24,7 +24,7 @@
 </style>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<meta http-equiv='Cache-Control' content='no-cache, no-store, must-revalidate'><meta http-equiv='Pragma' content='no-cache'><meta http-equiv='Expires' content='0'><title>Story Director V30.3 FINAL - Full 11 Voices - Same UI + 1.25x Fix</title>
+<meta http-equiv='Cache-Control' content='no-cache, no-store, must-revalidate'><meta http-equiv='Pragma' content='no-cache'><meta http-equiv='Expires' content='0'><title>Story Director V30.4 FINAL - Full 11 Voices - Same UI + 1.25x Fix</title>
 <script src="https://cdn.tailwindcss.com"></script>
 <style>
 body{background:#120c26;color:#e9e4ff;max-width:600px;margin:auto;font-family:Inter,system-ui}
@@ -59,7 +59,7 @@ button, [onclick] { pointer-events: auto !important; touch-action: manipulation 
 </style>
 </head>
 <body class="pb-32">
-<header class="p-4 bg-[#0e091e] flex justify-between items-center sticky top-0 z-30"><div><h1 class="font-black text-[18px]">Story Director V30.3 FINAL 🎬 11 Voices</h1><p class="text-[9px] text-[#a78bfa]">V28.9 FINAL - Female Fixed + Mixed Narrator + Emotion Fix + 11 Voices</p></div><div class="flex gap-2"><button onclick="toggleApiBox()" class="bg-[#241a3f] border border-[#3d2f68] text-white px-3 py-2 rounded-full text-[10px] font-black">⚙️ API</button><span class="bg-gradient-to-r from-purple-500 to-pink-500 text-white px-2 py-1 rounded-full text-[8px] font-black h-fit self-center">V28.9 FINAL</span></div></header>
+<header class="p-4 bg-[#0e091e] flex justify-between items-center sticky top-0 z-30"><div><h1 class="font-black text-[18px]">Story Director V30.4 FINAL 🎬 11 Voices</h1><p class="text-[9px] text-[#a78bfa]">V28.9 FINAL - Female Fixed + Mixed Narrator + Emotion Fix + 11 Voices</p></div><div class="flex gap-2"><button onclick="toggleApiBox()" class="bg-[#241a3f] border border-[#3d2f68] text-white px-3 py-2 rounded-full text-[10px] font-black">⚙️ API</button><span class="bg-gradient-to-r from-purple-500 to-pink-500 text-white px-2 py-1 rounded-full text-[8px] font-black h-fit self-center">V28.9 FINAL</span></div></header>
 <div id="apiBox" class="hidden p-3"><div class="card p-3 border-2 border-yellow-400 bg-[#1a1230]"><p class="text-[11px] font-black flex justify-between"><span>🔑 OpenAI Key</span><button onclick="toggleApiBox()" class="bg-black text-white rounded-full px-2 py-1 text-[8px]">✕ HIDE</button></p><input id="openaiKey" type="password" placeholder="sk-... paste once - saved forever" class="input-dark w-full mt-2 p-3 text-[11px]"><p id="apiStatus" class="text-[7px] mt-1 text-green-400"></p></div></div>
 <div class="flex justify-around p-3 bg-[#120c26] sticky top-[64px] z-20 border-b border-[#3d2f68] text-[11px] font-bold">
 <button onclick="setTab('ai')" id="tab-ai" class="tab-active pb-2">✨ AI Story</button>
@@ -420,6 +420,120 @@ document.addEventListener('change', e=>{
 function getDistinctVoiceForSpeaker(s){ return getVoiceToPlay(s); }
 
 setTimeout(fixVoiceDropdowns, 500);
+
+// V30.4 NATURAL PRO - Much More Human Speaking
+function enhanceDialogueNatural(text){
+  let t = text.trim();
+  // Preserve emotional markers but add breath cues for TTS
+  // ... -> slight hesitation
+  t = t.replace(/\.\.\.+/g, ' ... ');
+  // Multiple ! or ? keep emphasis
+  t = t.replace(/!{2,}/g, '!');
+  t = t.replace(/\?{2,}/g, '?');
+  // Add comma breathing - ensure space after comma if Hindi
+  t = t.replace(/,([^\s])/g, ', $1');
+  return t;
+}
+
+function buildNaturalInstruction(speaker, direction, dialogue, prevLine){
+  let intensity = 70;
+  try{
+    if(typeof speakerIntensityMap !== 'undefined' && speakerIntensityMap[speaker]) intensity = speakerIntensityMap[speaker];
+    // find current line intensity from currentScript
+    let idx = -1;
+    if(typeof currentScript !== 'undefined'){
+      for(let i=0;i<currentScript.length;i++) if(currentScript[i].speaker===speaker && currentScript[i].dialogue===dialogue) { idx=i; intensity=currentScript[i].intensity||intensity; break; }
+    }
+  }catch(e){}
+
+  // Base persona - Banarasi natural
+  let isFemale = false;
+  if(typeof speakerGenderMap !== 'undefined' && speakerGenderMap[speaker]==='female') isFemale=true;
+  let isNarrator = (speaker.toLowerCase().includes('narrat') || speaker==='नैरेटर');
+  
+  let persona = isNarrator ? `You are a warm Banarasi storyteller, mid-30s, calm and expressive` :
+                isFemale ? `You are ${speaker}, young Banarasi woman, expressive, natural पूर्वांचली accent, sweet and real` :
+                `You are ${speaker}, Banarasi man, natural पूर्वांचली Hindi, warm and real, not robotic`;
+
+  // Emotion to natural speaking style map
+  let emotionMap = {
+    'शर्मा कर': `shy, soft, slight smile, whispery, very low volume ${intensity}% , slow, hesitating, gentle breath`,
+    'धीरे से': `very soft, slow, intimate whisper, calm`,
+    'अत्यंत धीमी आवाज़ में': `extremely soft, sleepy whisper, barely audible, slow 0.9x pace, gentle`,
+    'फुसफुसाते हुए': `whispering, secretive, breathy`,
+    'प्यार से': `loving, warm, soft smile in voice, gentle, slow`,
+    'रोते हुए': `crying, voice breaking, sniff, breathy, slow, emotional, tears`,
+    'डरी हुई आवाज में': `scared, trembling voice, fast breathing, shaky`,
+    'गुस्से से': `angry, loud, sharp, fast, intense ${intensity}% , clenched`,
+    'डाँटते हुए': `scolding, stern, sharp, fast, commanding, high intensity`,
+    'खुशी से': `happy, bright, smiling, energetic, light laugh`,
+    'हँसते हुए': `laughing, joyful, giggling, bright`,
+    'जोश में': `excited, energetic, fast, powerful`,
+    'चिंता में': `worried, tense, slightly fast, breathy`,
+    'कराहती हुई आवाज में': `moaning in pain, breathy, slow, pained groan, very emotional`,
+    'सवालिया लहजे में': `curious, pitch rises at end, questioning`,
+    'नॉर्मल लहजे में': `natural conversational, calm, balanced`
+  };
+  
+  let emoDesc = emotionMap[direction] || `${direction}, intensity ${intensity}%, expressive`;
+  
+  // Speed hint based on emotion
+  let speedHint = '';
+  if(['शर्मा कर','धीरे से','अत्यंत धीमी आवाज़ में','फुसफुसाते हुए','प्यार से','रोते हुए','कराहती हुई आवाज में'].includes(direction)) speedHint='Speak slowly, soft pace, add natural pauses.';
+  else if(['गुस्से से','डाँटते हुए','जोश में','हँसते हुए'].includes(direction)) speedHint='Speak slightly faster, energetic.';
+  else speedHint='Speak natural conversational pace.';
+  
+  // Context from previous line
+  let contextHint = '';
+  if(prevLine){
+    contextHint = `Previous line was ${prevLine.speaker} saying "${prevLine.dialogue.substring(0,40)}" with emotion ${prevLine.direction}. React naturally to that.`;
+  }
+  
+  // Special handling for ... and ! ?
+  let pauseHint = '';
+  if(dialogue.includes('...')) pauseHint += ' There are ... meaning hesitation, pause 0.5s, soft sigh. ';
+  if(dialogue.includes('!')) pauseHint += ' Exclamation ! means emphasis, slight gasp. ';
+  if(dialogue.includes('?')) pauseHint += ' Question ? means pitch rises at end. ';
+  
+  // Banarasi flavor
+  let banarasi = `Use natural Banarasi/Hindi accent, पूर्वांचली touch, not pure Sanskrit. Sound like real person from Jaunpur/Banaras speaking Hindi, with warmth. Add small natural breaths, not robotic.`;
+  
+  return `${persona}. Emotion: ${emoDesc}. ${speedHint} ${banarasi} ${pauseHint} ${contextHint} Intensity ${intensity}%. Be extremely natural, human-like, with real feelings.`;
+}
+
+// Patch playLine to use natural instruction and enhanced dialogue
+let _origPlayLine = window.playLine;
+window.playLine = async function(i, save=true){
+  try{
+    let s = currentScript[i];
+    if(!s) return _origPlayLine ? _origPlayLine(i, save) : null;
+    let prev = i>0 ? currentScript[i-1] : null;
+    let naturalDlg = enhanceDialogueNatural(s.dialogue);
+    let voiceId = getVoiceToPlay(s.speaker);
+    let instruction = buildNaturalInstruction(s.speaker, s.direction, s.dialogue, prev);
+    let key = getKey(); if(!key){ toggleApiBox(); throw new Error('no key'); }
+    let body={model:'gpt-4o-mini-tts', voice:voiceId, input:naturalDlg, instructions:instruction};
+    let r=await fetch('https://api.openai.com/v1/audio/speech',{method:'POST',headers:{'Authorization':'Bearer '+key,'Content-Type':'application/json'},body:JSON.stringify(body)});
+    if(!r.ok){
+      // fallback to tts-1-hd with natural speed based on emotion
+      let fallbackSpeed = 1.0;
+      if(['शर्मा कर','धीरे से','अत्यंत धीमी आवाज़ में'].includes(s.direction)) fallbackSpeed=0.95;
+      if(['गुस्से से','जोश में'].includes(s.direction)) fallbackSpeed=1.05;
+      let fb=await fetch('https://api.openai.com/v1/audio/speech',{method:'POST',headers:{'Authorization':'Bearer '+key,'Content-Type':'application/json'},body:JSON.stringify({model:'tts-1-hd', voice:voiceId, input:naturalDlg, speed:fallbackSpeed})});
+      let blob=await fb.blob(); let url=URL.createObjectURL(blob);
+      if(save){ audioBlobs.push({url,blob}); audioUrls.push(url); }
+      let container=document.getElementById('audioPlayers');
+      if(container){ let div=document.createElement('div'); div.className='audio-item'; div.innerHTML=`<span class="text-[9px] font-black">${i+1}. ${s.speaker} (${s.direction}) - Natural</span><audio controls src="${url}" class="w-full mt-1 h-[28px]"></audio>`; container.appendChild(div); }
+      return {url,blob};
+    }
+    let blob=await r.blob(); let url=URL.createObjectURL(blob);
+    if(save){ audioBlobs.push({url,blob}); audioUrls.push(url); }
+    let container=document.getElementById('audioPlayers');
+    if(container){ let div=document.createElement('div'); div.className='audio-item'; div.innerHTML=`<span class="text-[9px] font-black text-green-400">✅ ${i+1}. ${s.speaker} (${s.direction}) - Natural Pro</span><audio controls src="${url}" class="w-full mt-1 h-[28px]"></audio>`; container.appendChild(div); }
+    return {url,blob};
+  }catch(e){ console.error('Natural play error', e); if(window._origPlayLine) return _origPlayLine(i, save); }
+};
+
 setInterval(fixVoiceDropdowns, 2000);
 
 // V29.3 SAFE PATCH
