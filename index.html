@@ -255,7 +255,19 @@ function renderScript(){
 }
 function editLine(i){ document.getElementById(`edit-${i}`).classList.remove('hidden'); }
 function cancelEdit(i){ document.getElementById(`edit-${i}`).classList.add('hidden'); }
-function saveEdit(i){ let sel=document.getElementById(`dir-${i}`); if(sel) currentScript[i].direction=sel.value; renderScript(); }
+function saveEdit(i){ 
+  let sel=document.getElementById(`dir-${i}`); 
+  if(sel){
+    let newEmo = sel.value;
+    currentScript[i].direction=newEmo;
+    const EMOTION_INTENSITY_MAP = {'अत्यंत धीमी आवाज़ में':25,'फुसफुसाते हुए':20,'शर्मा कर':30,'धीरे से':35,'प्यार से':50,'सवालिया लहजे में':55,'नॉर्मल लहजे में':60,'चिंता में':65,'कराहती हुई आवाज में':75,'रोते हुए':70,'हँसते हुए':75,'खुशी से':80,'डरी हुई आवाज में':85,'जोश में':85,'गुस्से से':90,'डाँटते हुए':95};
+    if(EMOTION_INTENSITY_MAP[newEmo]!==undefined){
+      currentScript[i].intensity = EMOTION_INTENSITY_MAP[newEmo];
+    }
+  }
+  renderScript(); 
+  if(typeof renderDirector==='function') renderDirector();
+}
 function convertForVoice(){ if(!currentScript.length){alert('Detect first'); return;} setTab('voice'); document.getElementById('playStatus').textContent=`Ready - ${currentScript.length} lines, ${speakers.length} speakers`; }
 function buildInstruction(speaker, direction){ let intensity=speakerIntensityMap[speaker]||70; return `Speak as ${speaker} in Hindi, emotion: ${direction}, intensity ${intensity}%. Natural Banarasi accent, expressive.`; }
 async function playLine(i,save=true){
