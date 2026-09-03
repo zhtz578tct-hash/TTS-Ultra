@@ -249,7 +249,7 @@ function renderScript(){
  let box=document.getElementById('scriptList'); box.innerHTML='';
  currentScript.forEach((c,i)=>{
   let div=document.createElement('div'); div.className='line-card';
-  div.innerHTML=`<div class="flex justify-between items-center"><span class="text-[10px] font-black">${i+1}. ${c.speaker}</span><div class="flex gap-2"><span class="direction-tag">${c.direction}</span><button onclick="editLine(${i})" class="direction-auto">✏️</button></div></div><p class="text-[12px] mt-2 dev">${c.dialogue}</p><div id="edit-${i}" class="edit-panel hidden"><select id="dir-${i}" class="input-dark w-full p-2 text-[9px]">${EMOTION_OPTIONS.map(e=>`<option ${e===c.direction?'selected':''}>${e}</option>`).join('')}</select><div class="flex gap-2 mt-2"><button onclick="saveEdit(${i})" class="btn-primary flex-1 py-2 text-[9px]">💾 Save & Close</button><button onclick="cancelEdit(${i})" class="btn-ghost flex-1 py-2 text-[9px]">✕ Cancel</button></div></div>`;
+  div.innerHTML=`<div class="flex justify-between items-center"><span class="text-[10px] font-black">${i+1}. ${c.speaker}</span><button onclick="editSpeaker(${i})" style="margin-left:6px;background:rgba(255,255,255,0.12);border:1px dashed #8b5cf6;padding:2px 6px;border-radius:6px;font-size:8px" title="Edit speaker & dialogue">✏️</button><div class="flex gap-2"><span class="direction-tag">${c.direction}</span><button onclick="editLine(${i})" class="direction-auto">✏️</button></div></div><p class="text-[12px] mt-2 dev">${c.dialogue}</p><div id="edit-${i}" class="edit-panel hidden"><select id="dir-${i}" class="input-dark w-full p-2 text-[9px]">${EMOTION_OPTIONS.map(e=>`<option ${e===c.direction?'selected':''}>${e}</option>`).join('')}</select><div class="flex gap-2 mt-2"><button onclick="saveEdit(${i})" class="btn-primary flex-1 py-2 text-[9px]">💾 Save & Close</button><button onclick="cancelEdit(${i})" class="btn-ghost flex-1 py-2 text-[9px]">✕ Cancel</button></div></div>`;
   box.appendChild(div);
  });
 }
@@ -735,7 +735,7 @@ function renderScriptV289(){
   currentScript.forEach((c,i)=>{
     if(c.intensity===undefined) c.intensity=intensityFromEmotion(c.direction);
     let div=document.createElement('div'); div.className='line-card';
-    div.innerHTML=`<div class="flex justify-between items-center"><span class="text-[10px] font-black">${i+1}. ${c.speaker}</span><div class="flex gap-2 items-center"><span class="direction-tag">${c.direction}</span><span class="text-[8px] bg-[#2a1f4a] px-2 py-1 rounded-full border border-[#3d2f68]">${c.intensity}%</span><button onclick="window.playLine(${i}, false)" style="background:#8b5cf6;color:white;padding:4px 12px;border-radius:9999px;font-size:9px;font-weight:900">▶️ PLAY</button><button onclick="editLine(${i})" class="direction-auto">✏️</button></div></div><p class="text-[12px] mt-2 dev">${c.dialogue}</p><div class="mt-2 flex items-center gap-2"><input type="range" min="0" max="100" value="${c.intensity}" data-line="${i}" class="line-intensity w-full" style="accent-color:#ec4899"><span class="text-[8px] w-8">${c.intensity}%</span><button onclick="window.playLine(${i}, false)" style="background:rgba(236,72,153,0.2);border:1px solid #ec4899;padding:4px 8px;border-radius:9999px;font-size:9px">🔊</button></div><div id="edit-${i}" class="edit-panel hidden"><select id="dir-${i}" class="input-dark w-full p-2 text-[9px]">${(typeof EMOTION_OPTIONS!=='undefined'?EMOTION_OPTIONS:['नॉर्मल लहजे में','सवालिया लहजे में','डरी हुई आवाज में','रोते हुए','गुस्से से','खुशी से','प्यार से','जोश में','धीरे से','डाँटते हुए']).map(e=>`<option ${e===c.direction?'selected':''}>${e}</option>`).join('')}</select><div class="flex gap-2 mt-2"><button onclick="saveEdit(${i})" class="btn-primary flex-1 py-2 text-[9px]">💾 Save</button><button onclick="cancelEdit(${i})" class="btn-ghost flex-1 py-2 text-[9px]">✕ Cancel</button></div></div>`;
+    div.innerHTML=`<div class="flex justify-between items-center"><span class="text-[10px] font-black">${i+1}. ${c.speaker}</span><button onclick="editSpeaker(${i})" style="margin-left:6px;background:rgba(255,255,255,0.12);border:1px dashed #8b5cf6;padding:2px 6px;border-radius:6px;font-size:8px" title="Edit speaker & dialogue">✏️</button><div class="flex gap-2 items-center"><span class="direction-tag">${c.direction}</span><span class="text-[8px] bg-[#2a1f4a] px-2 py-1 rounded-full border border-[#3d2f68]">${c.intensity}%</span><button onclick="window.playLine(${i}, false)" style="background:#8b5cf6;color:white;padding:4px 12px;border-radius:9999px;font-size:9px;font-weight:900">▶️ PLAY</button><button onclick="editLine(${i})" class="direction-auto">✏️</button></div></div><p class="text-[12px] mt-2 dev">${c.dialogue}</p><div class="mt-2 flex items-center gap-2"><input type="range" min="0" max="100" value="${c.intensity}" data-line="${i}" class="line-intensity w-full" style="accent-color:#ec4899"><span class="text-[8px] w-8">${c.intensity}%</span><button onclick="window.playLine(${i}, false)" style="background:rgba(236,72,153,0.2);border:1px solid #ec4899;padding:4px 8px;border-radius:9999px;font-size:9px">🔊</button></div><div id="edit-${i}" class="edit-panel hidden"><select id="dir-${i}" class="input-dark w-full p-2 text-[9px]">${(typeof EMOTION_OPTIONS!=='undefined'?EMOTION_OPTIONS:['नॉर्मल लहजे में','सवालिया लहजे में','डरी हुई आवाज में','रोते हुए','गुस्से से','खुशी से','प्यार से','जोश में','धीरे से','डाँटते हुए']).map(e=>`<option ${e===c.direction?'selected':''}>${e}</option>`).join('')}</select><div class="flex gap-2 mt-2"><button onclick="saveEdit(${i})" class="btn-primary flex-1 py-2 text-[9px]">💾 Save</button><button onclick="cancelEdit(${i})" class="btn-ghost flex-1 py-2 text-[9px]">✕ Cancel</button></div></div>`;
     box.appendChild(div);
   });
   document.querySelectorAll('.line-intensity').forEach(sl=>{
@@ -868,6 +868,55 @@ function cleanTextNodes(){
 document.addEventListener('DOMContentLoaded', ()=>{ setTimeout(cleanTextNodes, 300); setTimeout(cleanTextNodes, 1500); });
 setTimeout(cleanTextNodes, 800);
 setInterval(cleanTextNodes, 3000);
+</script>
+
+
+<script id="v30_11_speaker_edit">
+function editSpeaker(i){
+  let panel=document.getElementById(`edit-speak-${i}`);
+  if(panel){ panel.classList.remove('hidden'); }
+}
+function cancelSpeaker(i){
+  let panel=document.getElementById(`edit-speak-${i}`);
+  if(panel) panel.classList.add('hidden');
+}
+function saveSpeaker(i){
+  let sp=document.getElementById(`speak-name-${i}`);
+  let dg=document.getElementById(`speak-dia-${i}`);
+  if(sp && currentScript[i]) currentScript[i].speaker = sp.value.trim() || currentScript[i].speaker;
+  if(dg && currentScript[i]) currentScript[i].dialogue = dg.value.trim() || currentScript[i].dialogue;
+  // Also update speakers list if new speaker
+  if(typeof speakers!=='undefined' && sp){
+    if(!speakers.includes(sp.value.trim()) && sp.value.trim()){
+      speakers.push(sp.value.trim());
+    }
+  }
+  cancelSpeaker(i);
+  if(typeof renderScript==='function') renderScript();
+  if(typeof renderDirector==='function') renderDirector();
+  // Also re-render voice mappings if needed
+  if(typeof renderVoiceStudio==='function') setTimeout(()=>renderVoiceStudio(), 300);
+}
+// Auto inject speaker edit panels after each card render
+const _origRenderDirector = window.renderDirector;
+const _origRenderScript = window.renderScript;
+
+// Patch render to include extra panel - we use MutationObserver to add panels that are missing
+function ensureSpeakerPanels(){
+  if(typeof currentScript==='undefined') return;
+  currentScript.forEach((c,i)=>{
+    let editDiv = document.getElementById(`edit-${i}`);
+    if(editDiv && !document.getElementById(`edit-speak-${i}`)){
+      let panel=document.createElement('div');
+      panel.id=`edit-speak-${i}`;
+      panel.className='edit-panel hidden mt-2 p-2 rounded-lg bg-[#1e143c] border border-[#8b5cf6]';
+      panel.innerHTML=`<div class="text-[8px] font-black mb-1 text-purple-300">✏️ Edit Speaker & Dialogue</div><input id="speak-name-${i}" class="input-dark w-full p-2 text-[11px] mb-2" placeholder="Speaker name" value="${c.speaker.replace(/"/g,'&quot;')}"><textarea id="speak-dia-${i}" class="input-dark w-full p-2 text-[11px] h-20" placeholder="Dialogue">${c.dialogue.replace(/</g,'&lt;')}</textarea><div class="flex gap-2 mt-2"><button onclick="saveSpeaker(${i})" class="btn-primary flex-1 py-2 text-[9px]">💾 Save Speaker</button><button onclick="cancelSpeaker(${i})" class="btn-ghost flex-1 py-2 text-[9px]">✕ Cancel</button></div>`;
+      editDiv.parentNode.insertBefore(panel, editDiv.nextSibling);
+    }
+  });
+}
+setInterval(ensureSpeakerPanels, 1000);
+document.addEventListener('DOMContentLoaded', ()=>setTimeout(ensureSpeakerPanels, 800));
 </script>
 
 <script>(function(){var loc=location.href.replace(/#.*$/,"");var ATTR_NAMES=["data-product-id","data-productid","data-product_id","product-id","productid","product_id","data-source-entity-id","source-entity-id","source_entity_id","data-product","data-metadata","data-meta"];var DATASET_KEYS=["productId","productid","product_id","sourceEntityId","sourceentityid","source_entity_id","product","metadata","meta"];function readProductId(value){if(typeof value!=="string"||value.length===0)return null;if(/^[0-9]{6,}$/.test(value))return value;var match=value.match(/(?:product(?:_|-)?id|source(?:_|-)?entity(?:_|-)?id)["'=:\s]+([0-9]{6,})/i);return match?match[1]:null}function extractProductId(start){for(var node=start;node&&node!==document.body;node=node.parentElement){for(var i=0;i<ATTR_NAMES.length;i++){var attrValue=node.getAttribute&&node.getAttribute(ATTR_NAMES[i]);var attrProductId=readProductId(attrValue);if(attrProductId)return attrProductId}var dataset=node.dataset||null;if(dataset){for(var j=0;j<DATASET_KEYS.length;j++){var dataValue=dataset[DATASET_KEYS[j]];var dataProductId=readProductId(dataValue);if(dataProductId)return dataProductId}}}return null}function isInlineMediaSlotElement(node){return !!(node&&node.getAttribute&&node.getAttribute("data-clippy-inline-media-slot")!==null)}function findInlineMediaSlot(start){for(var node=start;node&&node!==document.body;node=node.parentElement){if(isInlineMediaSlotElement(node))return node}return null}function readInlineMediaUrl(node){if(!node)return null;return node.getAttribute&&((node.getAttribute("data-clippy-inline-media-url")||node.getAttribute("data-url")||node.getAttribute("data_url")))||node.href||null}function stripHash(url){return String(url).replace(/#.*$/,"")}function urlsMatch(a,b){if(!a||!b)return false;try{return stripHash(new URL(a,loc).href)===stripHash(new URL(b,loc).href)}catch(_){return stripHash(a)===stripHash(b)}}function isFirstPartyReelUrl(value){try{var url=new URL(value,loc);if(url.protocol!=="https:")return false;var host=url.hostname.toLowerCase();var supported=host==="instagram.com"||host.endsWith(".instagram.com")||host==="facebook.com"||host.endsWith(".facebook.com");return supported&&/\/reels?\//i.test(url.pathname)}catch(_){return false}}function isInlineMediaUrlClick(node,href){var slot=findInlineMediaSlot(node);if(!slot)return false;var slotUrl=readInlineMediaUrl(slot);if(slotUrl)return urlsMatch(href,slotUrl);return isFirstPartyReelUrl(href)}function findDataHref(start){for(var node=start;node&&node!==document.body;node=node.parentElement){if(node.getAttribute){var href=node.getAttribute("data-href")||node.getAttribute("data-url");if(href)return{href:href,node:node}}}return null}var nativeOpen=window.open;window.open=function(url){if(parent!==window&&typeof url==="string"&&/^https?:\/\//.test(url)){parent.postMessage({type:"ecto:usercontent-link-click",href:url},"*");return null}return nativeOpen?nativeOpen.apply(window,arguments):null};document.addEventListener("click",function(e){var target=e.target instanceof Element?e.target:null;if(!target)return;if(parent===window)return;var a=target.closest?target.closest("a[href]"):null;if(a&&a.href&&/^https?:\/\//.test(a.href)&&a.href.replace(/#.*$/,"")!==loc){if(isInlineMediaUrlClick(a,a.href))return;var productId=extractProductId(target)||extractProductId(a);if(productId){e.preventDefault();parent.postMessage({type:"ecto-artifact-link-click",productId:productId},"*");return}e.preventDefault();parent.postMessage({type:"ecto:usercontent-link-click",href:a.href},"*");return}var dataHref=findDataHref(target);if(dataHref&&/^https?:\/\//.test(dataHref.href)&&dataHref.href.replace(/#.*$/,"")!==loc){if(isInlineMediaUrlClick(dataHref.node,dataHref.href))return;e.preventDefault();parent.postMessage({type:"ecto:usercontent-link-click",href:dataHref.href},"*")}},true)})();</script><script>(function(){var FOCUS_TYPE="ecto:artifact-focus-request";var CLOSE_TYPE="ecto:artifact-close-request";function focusArtifactDocument(){var body=document.body;if(!body)return;try{window.focus();}catch(e){}if(!body.hasAttribute("tabindex"))body.setAttribute("tabindex","-1");try{body.focus({preventScroll:true});}catch(e){try{body.focus();}catch(e2){}}}window.addEventListener("message",function(event){if(event.source!==window.parent)return;var data=event.data;if(!data||typeof data!=="object"||data.type!==FOCUS_TYPE)return;if(document.readyState==="loading"){document.addEventListener("DOMContentLoaded",focusArtifactDocument,{once:true});return;}focusArtifactDocument();});window.addEventListener("keydown",function(event){if(event.key!=="Escape")return;window.setTimeout(function(){if(event.defaultPrevented)return;window.parent.postMessage({type:CLOSE_TYPE},"*");},0);});})();</script></body>
