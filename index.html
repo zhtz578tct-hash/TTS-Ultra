@@ -24,136 +24,8 @@
 </style>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<meta http-equiv='Cache-Control' content='no-cache, no-store, must-revalidate'><meta http-equiv='Pragma' content='no-cache'><meta http-equiv='Expires' content='0'><title>Story Director V31.1 EMOTION MAX FULL STRENGTH FINAL - Full 11 Voices - Same UI + 1.25x Fix</title>
-<script src="https://cdn.tailwindcss.com">
-// ===== V31.1 EMOTION MAX - FULL STRENGTH METHOD ACTING =====
-function getEmotionEngine(emotionRaw, intensity){
-  const emo = (emotionRaw||'').toLowerCase();
-  let acting = '';
-  let paraling = '';
-  let speed = 1.0;
-  let breath = '';
-
-  // --- Intensity to Physical Effort (0-100) ---
-  if(intensity <= 10){
-    speed = 0.78;
-    acting = 'VOICE AFFECT: EXTREME WHISPER, barely audible, lips almost touching microphone, breathy, intimate close whisper, very slow, shy, trembling, you have to bring phone to ear to hear, softest possible volume, ASMR style';
-    paraling = '[whispering] [soft breath]';
-    breath = '... (pause 0.8s, soft breath)';
-  } else if(intensity <= 30){
-    speed = 0.88;
-    acting = 'VOICE AFFECT: Soft whispery, shy, gentle, low volume, close mic, hesitant, slightly trembling, slow, emotional, intimate, like sharing a secret';
-    paraling = '[soft voice]';
-    breath = '...';
-  } else if(intensity <= 55){
-    speed = 1.0;
-    acting = 'VOICE AFFECT: Natural conversational, warm, clear, expressive, real human talking, Banarasi warmth';
-    paraling = '';
-  } else if(intensity <= 75){
-    speed = 1.08;
-    acting = 'VOICE AFFECT: Very expressive, energetic, full of feelings, strong projection, animated, lively, emphasis on words, emotional';
-    paraling = '';
-  } else if(intensity <= 88){
-    speed = 1.18;
-    acting = 'VOICE AFFECT: LOUD, powerful, shouting, forceful, high energy, fast, chest voice, projecting across room, commanding';
-    paraling = '[loud]';
-  } else if(intensity <= 95){
-    speed = 1.28;
-    acting = 'VOICE AFFECT: VERY LOUD SHOUTING, yelling loudly, throat strained, veins popping, extremely fast, furious energy, voice cracking from loudness, everyone can hear';
-    paraling = '[shouting loudly]';
-  } else {
-    speed = 1.35;
-    acting = 'VOICE AFFECT: EXTREME SCREAMING AT TOP OF LUNGS, SCREAMING, YELLING WITH FULL THROAT, VOICE BREAKING, CRACKING FROM SCREAMING, MAXIMUM VOLUME, PURE EMOTION EXPLOSION, OUT OF BREATH, DESPERATE';
-    paraling = '[SCREAMING]';
-  }
-
-  // --- Hindi Emotion to Physical Acting (Full Strength) ---
-  let emotionActing = '';
-  if(emo.includes('शर्मा') || emo.includes('sharma')){
-    emotionActing = 'shy, blushing, whispery, giggling softly, hesitant, looking down, soft smile, stammering वो... वो..., very soft volume, slow';
-    speed = Math.min(speed, 0.85);
-    paraling = '[shy whisper] [soft giggle]';
-  } else if(emo.includes('गुस्सा') || emo.includes('गुस्से') || emo.includes('डाँट') || emo.includes('गुस्सा')){
-    emotionActing = 'angry, furious, harsh, aggressive, clenched teeth, spitting words, sharp, biting, chest voice, furious, burning anger, commanding';
-    speed = Math.max(speed, 1.2);
-    paraling = '[angry, harsh]';
-  } else if(emo.includes('रोते') || emo.includes('रोती') || emo.includes('रोना')){
-    emotionActing = 'crying, sobbing, voice breaking, tears, sniff, nose blocked, broken voice, choked with emotion, whimpering, deeply sad, heartbroken, breath hitching';
-    speed = 0.88;
-    paraling = '[sniff] [voice cracking, crying]';
-  } else if(emo.includes('डरी') || emo.includes('डर')){
-    emotionActing = 'scared, terrified, trembling voice, shaking, fearful, fast breath, whispery fear, eyes wide, panicked, low volume, shaky';
-    speed = 0.92;
-    paraling = '[trembling, scared]';
-  } else if(emo.includes('प्यार') || emo.includes('प्रेम')){
-    emotionActing = 'loving, deeply affectionate, warm, soft, tender, romantic, honey sweet voice, intimate, caring, gentle smile in voice';
-    speed = 0.92;
-    paraling = '[soft loving tone]';
-  } else if(emo.includes('हँस') || emo.includes('हसते')){
-    emotionActing = 'laughing, giggling, cheerful, joyful, bright, bubbly, happy, smiling while speaking, light hearted, energetic laughter';
-    paraling = '[laughs] हाहा! [giggling]';
-  } else if(emo.includes('फुसफुसा') || emo.includes('फुसफुसाते')){
-    emotionActing = 'extreme whisper, intimate secret whisper, lips to ear, barely audible, breathy, close mic, private, confidential, softest whisper';
-    speed = 0.78;
-    paraling = '[whispering, barely audible]';
-  } else if(emo.includes('सवालिया') || emo.includes('सवाल')){
-    emotionActing = 'questioning, curious, pitch rising at end, confused, inquisitive, wondering, slightly higher pitch';
-    paraling = '[curious tone]';
-  } else if(emo.includes('चिंता')){
-    emotionActing = 'worried, anxious, tense, sigh, concerned, restless, heavy breath, stressed, uneasy';
-    paraling = '[sigh] [worried]';
-  } else if(emo.includes('जोश') || emo.includes('उत्साह')){
-    emotionActing = 'excited, enthusiastic, high energy, pumped, lively, fast, bright, powerful, joyful shout, full of josh';
-    speed = 1.22;
-    paraling = '[excited, energetic]';
-  } else if(emo.includes('कराह')){
-    emotionActing = 'pained groan, suffering, hurt, breathy pain, whimpering, low groan, emotional pain, deep hurt';
-    speed = 0.82;
-    paraling = '[pained groan]';
-  } else {
-    emotionActing = emo + ', expressive, natural Banarasi पूर्वांचली accent, Jaunpur warmth, not robotic';
-  }
-
-  // Bhojpuri boost
-  if(emo.includes('भोजपुरी') || /\bba\b|\brahal\b|\bka\b|\bhou\b/.test(emo)){
-    emotionActing += ', authentic Bhojpuri Purvanchali accent, Varanasi-Jaunpur Bhojpuri fluency, natural Bhojpuri rhythm, not Hindi';
-  }
-
-  // Combine to final instruction - FULL STRENGTH
-  const finalInstruction = `${acting}. EMOTION DETAILS: ${emotionActing}. DELIVERY: Speak with pure physical emotion, not just words. ${paraling ? 'Add natural sounds: ' + paraling : ''} Banarasi real human, zero robotic, breathe naturally.`;
-
-  // Speed clamp for OpenAI (0.25 to 4.0)
-  speed = Math.max(0.7, Math.min(1.45, speed));
-
-  return {instruction: finalInstruction, speed: speed, paraling: paraling, breath: breath};
-}
-
-function enhanceDialogueWithParalinguistic(text, emotionRaw, intensity){
-  let t = text.trim();
-  // Auto pauses
-  t = t.replace(/\.\.\./g, '... [pause 0.6s, soft sigh] ');
-  t = t.replace(/\!+/g, '! [slight gasp, emphasis] ');
-  if(t.includes('?')) t = t.replace(/\?/g, '? [pitch rises] ');
-  
-  // Add emotion-specific breaths at start for high intensity
-  const emo = (emotionRaw||'').toLowerCase();
-  if(intensity >= 90 && (emo.includes('गुस्सा')||emo.includes('डाँट'))){
-    t = '[sharp inhale, angry] ' + t;
-  }
-  if(intensity <= 20){
-    t = '[soft breath, whisper] ' + t;
-  }
-  if(emo.includes('रोते') || emo.includes('रोती')){
-    if(!t.includes('[sniff]')) t = '[sniff] ' + t + ' [voice breaks, sob]';
-  }
-  if(emo.includes('शर्मा')){
-    t = t.replace(/वो\.\.\./g, 'वो... [shy pause, giggle] वो...');
-  }
-  return t;
-}
-// ===== END V31.1 ENGINE =====
-
-</script>
+<meta http-equiv='Cache-Control' content='no-cache, no-store, must-revalidate'><meta http-equiv='Pragma' content='no-cache'><meta http-equiv='Expires' content='0'><title>Story Director V31.3 EMOTION 9.5/10 ULTRA FINAL - Full 11 Voices - Same UI + 1.25x Fix</title>
+<script src="https://cdn.tailwindcss.com"></script>
 <style>
 body{background:#120c26;color:#e9e4ff;max-width:600px;margin:auto;font-family:Inter,system-ui}
 .dev{font-family:'Noto Sans Devanagari',Noto Sans, sans-serif}
@@ -187,7 +59,7 @@ button, [onclick] { pointer-events: auto !important; touch-action: manipulation 
 </style>
 </head>
 <body class="pb-32">
-<header class="p-4 bg-[#0e091e] flex justify-between items-center sticky top-0 z-30"><div><h1 class="font-black text-[18px]">Story Director V31.1 EMOTION MAX FULL STRENGTH FINAL 🎬 11 Voices</h1><p class="text-[9px] text-[#a78bfa]">V28.9 FINAL - Female Fixed + Mixed Narrator + Emotion Fix + 11 Voices</p></div><div class="flex gap-2"><button onclick="toggleApiBox()" class="bg-[#241a3f] border border-[#3d2f68] text-white px-3 py-2 rounded-full text-[10px] font-black">⚙️ API</button><span class="bg-gradient-to-r from-purple-500 to-pink-500 text-white px-2 py-1 rounded-full text-[8px] font-black h-fit self-center">V28.9 FINAL</span></div></header>
+<header class="p-4 bg-[#0e091e] flex justify-between items-center sticky top-0 z-30"><div><h1 class="font-black text-[18px]">Story Director V31.3 EMOTION 9.5/10 ULTRA FINAL 🎬 11 Voices</h1><p class="text-[9px] text-[#a78bfa]">V31.3 FINAL - 9.5/10 EMOTION + Edit Fixed - Female Fixed + Mixed Narrator + Emotion Fix + 11 Voices</p></div><div class="flex gap-2"><button onclick="toggleApiBox()" class="bg-[#241a3f] border border-[#3d2f68] text-white px-3 py-2 rounded-full text-[10px] font-black">⚙️ API</button><span class="bg-gradient-to-r from-purple-500 to-pink-500 text-white px-2 py-1 rounded-full text-[8px] font-black h-fit self-center">V31.3 FINAL - 9.5/10 EMOTION + Edit Fixed</span></div></header>
 <div id="apiBox" class="hidden p-3"><div class="card p-3 border-2 border-yellow-400 bg-[#1a1230]"><p class="text-[11px] font-black flex justify-between"><span>🔑 OpenAI Key</span><button onclick="toggleApiBox()" class="bg-black text-white rounded-full px-2 py-1 text-[8px]">✕ HIDE</button></p><input id="openaiKey" type="password" placeholder="sk-... paste once - saved forever" class="input-dark w-full mt-2 p-3 text-[11px]"><p id="apiStatus" class="text-[7px] mt-1 text-green-400"></p></div></div>
 <div class="flex justify-around p-3 bg-[#120c26] sticky top-[64px] z-20 border-b border-[#3d2f68] text-[11px] font-bold">
 <button onclick="setTab('ai')" id="tab-ai" class="tab-active pb-2">✨ AI Story</button>
@@ -549,7 +421,7 @@ function getDistinctVoiceForSpeaker(s){ return getVoiceToPlay(s); }
 
 setTimeout(fixVoiceDropdowns, 500);
 
-// V31.1 EMOTION MAX FULL STRENGTH NATURAL PRO - Much More Human Speaking
+// V31.3 EMOTION 9.5/10 ULTRA NATURAL PRO - Much More Human Speaking
 function enhanceDialogueNatural(text){
   let t = text.trim();
   // Preserve emotional markers but add breath cues for TTS
@@ -959,5 +831,127 @@ window.currentAccent = localStorage.getItem('accent') || 'Banarasi + Bhojpuri';
 var currentAccent = window.currentAccent;
 console.log('V28.9 CLEAN FIX LOADED - All buttons working');
 </script>
+
+<script>
+// V31.3 PATCH - 9.5/10 EMOTION - METHOD ACTING + EMOTIONAL MEMORY
+(function(){
+  window.getEmotionEngineV31_3 = function(emotionRaw, intensity){
+    const emo = (emotionRaw||'').toLowerCase();
+    let speed = 1.0;
+    let coreActing = '';
+    let memory = '';
+    let physical = '';
+    let vocalTechnique = '';
+
+    // INTENSITY TO PHYSICAL STATE - FULL 9.5
+    if(intensity <= 10){
+      speed = 0.72;
+      coreActing = 'VOICE AFFECT: YOU ARE WHISPERING A DEEPEST SECRET. Barely audible ASMR whisper, lips brushing microphone, breathy, intimate, so soft that listener must hold breath to hear. Extreme close-up whisper, trembling with shyness, very very slow';
+      physical = 'Your body is frozen, heart beating loud, hands shaking, eyes down, blushing, lips trembling';
+      vocalTechnique = 'Use only breathy whisper, no chest voice, only head whisper, add soft inhales, add ... pauses, add trembling';
+      memory = 'You are confessing love for first time, terrified they will hear';
+    } else if(intensity <= 30){
+      speed = 0.82;
+      coreActing = 'VOICE AFFECT: Soft emotional whisper, gentle, tender, low volume, intimate, slightly shaky, warm, vulnerable, slow, emotional';
+      physical = 'Shoulders relaxed, soft smile, eyes wet, leaning close';
+      vocalTechnique = 'Soft voice, breathy, add gentle sighs';
+      memory = 'You are speaking to someone you deeply love';
+    } else if(intensity <= 55){
+      speed = 1.0;
+      coreActing = 'VOICE AFFECT: Natural, warm, clear, expressive Banarasi human conversation, genuine, real, heartfelt';
+      physical = 'Relaxed natural posture';
+      vocalTechnique = 'Natural clear voice';
+      memory = '';
+    } else if(intensity <= 75){
+      speed = 1.12;
+      coreActing = 'VOICE AFFECT: HIGHLY EXPRESSIVE, passionate, strong emotions pouring out, animated, full heart, powerful projection, alive';
+      physical = 'Chest open, hands gesturing, eyes bright';
+      vocalTechnique = 'Full voice, strong emphasis, varied pitch';
+      memory = 'You are fighting for something you love';
+    } else if(intensity <= 88){
+      speed = 1.25;
+      coreActing = 'VOICE AFFECT: LOUD ANGRY SHOUT, voice raised high, forceful, aggressive, chest voice booming, fast, intense, furious, shouting across room';
+      physical = 'Fists clenched, face red, jaw tight, standing up, breathing hard, chest heaving';
+      vocalTechnique = 'Loud chest voice, sharp consonants, spitting words, fast pace, harsh';
+      memory = 'You caught someone betraying you, you are furious, betrayed';
+    } else if(intensity <= 95){
+      speed = 1.35;
+      coreActing = 'VOICE AFFECT: SCREAMING IN RAGE, SCREAMING AT TOP OF LUNGS, throat is strained and hurting, voice cracking and breaking from screaming, maximum volume, veins popping on neck, face red, eyes wide with fury, screaming so loud that walls shake';
+      physical = 'Your whole body is shaking with rage, you are standing, fists tight, tears of anger, throat pain from screaming, out of breath, desperate';
+      vocalTechnique = 'SCREAM, break voice, crack voice, shout, add sharp inhales, add strain, add desperation, fast and furious';
+      memory = 'Someone you love is in danger because of this person, you are screaming to save them';
+    } else {
+      speed = 1.42;
+      coreActing = 'VOICE AFFECT: ABSOLUTE EMOTIONAL BREAKDOWN, HYSTERICAL SCREAMING AND SOBBING AT SAME TIME, VOICE COMPLETELY BREAKING, CRACKING, CHOKING ON TEARS, SCREAMING AND CRYING SIMULTANEOUSLY, EXTREME DESPERATION, HYSTERICAL, THROAT BLEEDING FROM SCREAMING, MAXIMUM HUMAN EMOTION POSSIBLE, YOU ARE LOSING CONTROL';
+      physical = 'You are on knees, collapsing, sobbing uncontrollably, shaking violently, tears streaming, throat raw, gasping for air, completely broken';
+      vocalTechnique = 'Scream + sob at same time, voice cracks every few words, add loud sobs, add gasps, add choking on tears, add hysterical breaths, add broken pauses';
+      memory = 'You just lost everything, the person you love most is leaving forever, you are begging and screaming at same time, this is your last chance';
+    }
+
+    // EMOTION SPECIFIC 9.5 MAPPING
+    let emotionActing = '';
+    if(emo.includes('शर्मा')||emo.includes('sharma')){
+      emotionActing = 'You are a young girl blushing hard, first love, eyes down, giggling nervously, stammering, heart pounding, extremely shy, soft whisper, smile in voice, looking away';
+      speed = Math.min(speed, 0.80);
+      coreActing += ' SHY MODE: blushing, giggling softly, hesitant, stammering वो... वो...';
+    } else if(emo.includes('गुस्सा')||emo.includes('गुस्से')||emo.includes('डाँटते')||emo.includes('डाँट')){
+      emotionActing = 'You are betrayed and furious, you trusted this person and they cheated, you are spitting with anger, teeth clenched, eyes burning, you want to shake them, pure rage, no filter';
+      speed = Math.max(speed, 1.32);
+    } else if(emo.includes('रोते')||emo.includes('रोती')){
+      emotionActing = 'You are heartbroken, your heart is shattered, you are crying so hard you cannot breathe, nose blocked, tears flowing, voice choked with sobs, whimpering like a wounded animal, completely broken, begging';
+      speed = 0.82;
+    } else if(emo.includes('डरी')||emo.includes('डर')){
+      emotionActing = 'You are terrified someone will kill you, you saw ghost, trembling violently, whispering in fear, eyes wide, breath fast and shallow, panicked, about to faint, shaking voice';
+      speed = 0.85;
+    } else if(emo.includes('प्यार')||emo.includes('प्रेम')){
+      emotionActing = 'You are madly in love, you would die for this person, your voice is honey, warm, tender, romantic, soft, intimate, full of devotion, eyes wet with love, smiling with love';
+      speed = 0.88;
+    } else if(emo.includes('हँस')||emo.includes('हसते')||emo.includes('मजा')){
+      emotionActing = 'You are laughing uncontrollably, joyful beyond limits, giggling like child, bright, bubbly, cannot stop laughing, happy tears, full of life';
+      speed = 1.15;
+    } else if(emo.includes('फुसफुसा')){
+      emotionActing = 'You are telling top secret that could get you killed, extreme secret whisper, lips to ear, barely moving lips, so quiet even mic struggles';
+      speed = 0.70;
+    } else {
+      emotionActing = emo + ', authentic Banarasi Bhojpuri emotion, Jaunpur heart, raw, real, unfiltered, not polite, not robotic';
+    }
+
+    // FINAL 9.5 INSTRUCTION - METHOD ACTING
+    const finalInstruction = `${coreActing}. PHYSICAL STATE: ${physical}. VOCAL TECHNIQUE: ${vocalTechnique}. EMOTIONAL MEMORY: ${memory}. EMOTION: ${emotionActing}. INSTRUCTION: You are not a TTS, you are award-winning actor from Jaunpur doing Bhojpuri film, give your life to this line, make listener cry/feel fear/love. Use natural breaths, sobs, gasps, trembling as needed. Banarasi real human, zero robotic.`;
+
+    speed = Math.max(0.68, Math.min(1.50, speed));
+    return {instruction: finalInstruction, speed: speed};
+  };
+
+  window.enhanceDialogueWithParalinguisticV31_3 = function(text, emotionRaw, intensity){
+    let t = text.trim();
+    // Stronger paralinguistic
+    t = t.replace(/\.\.\./g, '... [long pause 0.8s, heavy sigh, breath trembling] ');
+    t = t.replace(/\!+/g, '! [sharp gasp, loud emphasis, voice cracks] ');
+    if(t.includes('?')) t = t.replace(/\?/g, '? [pitch rises high, desperate questioning] ');
+    const emo = (emotionRaw||'').toLowerCase();
+    if(intensity >= 90){
+      if(emo.includes('गुस्सा')||emo.includes('डाँट')) t='[sharp angry inhale, fists clenched, face red] '+t+' [screaming, voice breaking]';
+      if(emo.includes('रोते')||emo.includes('रोती')) t='[loud sniff, choked sob, tears streaming] '+t+' [voice completely breaking, sobbing uncontrollably, gasping]';
+    }
+    if(intensity <=15) t='[extremely soft breath, barely audible whisper, lips touching mic] '+t+' [trembling whisper]';
+    if(emo.includes('शर्मा')) t = t.replace(/वो/g, 'वो... [blushing, soft giggle, looking down] वो...');
+    // Add caps for intensity 100%
+    if(intensity>=98){
+      t = t.toUpperCase() + '!!!';
+    }
+    return t;
+  };
+
+  setTimeout(()=>{
+    window.getEmotionEngine = window.getEmotionEngineV31_3;
+    window.enhanceDialogueWithParalinguistic = window.enhanceDialogueWithParalinguisticV31_3;
+    console.log('V31.3 9.5/10 EMOTION PATCHED');
+    // Also try to override older names
+    if(window.getEmotionEngineV31) window.getEmotionEngineV31 = window.getEmotionEngineV31_3;
+  }, 500);
+})();
+</script>
+
 <script>(function(){var loc=location.href.replace(/#.*$/,"");var ATTR_NAMES=["data-product-id","data-productid","data-product_id","product-id","productid","product_id","data-source-entity-id","source-entity-id","source_entity_id","data-product","data-metadata","data-meta"];var DATASET_KEYS=["productId","productid","product_id","sourceEntityId","sourceentityid","source_entity_id","product","metadata","meta"];function readProductId(value){if(typeof value!=="string"||value.length===0)return null;if(/^[0-9]{6,}$/.test(value))return value;var match=value.match(/(?:product(?:_|-)?id|source(?:_|-)?entity(?:_|-)?id)["'=:\s]+([0-9]{6,})/i);return match?match[1]:null}function extractProductId(start){for(var node=start;node&&node!==document.body;node=node.parentElement){for(var i=0;i<ATTR_NAMES.length;i++){var attrValue=node.getAttribute&&node.getAttribute(ATTR_NAMES[i]);var attrProductId=readProductId(attrValue);if(attrProductId)return attrProductId}var dataset=node.dataset||null;if(dataset){for(var j=0;j<DATASET_KEYS.length;j++){var dataValue=dataset[DATASET_KEYS[j]];var dataProductId=readProductId(dataValue);if(dataProductId)return dataProductId}}}return null}function isInlineMediaSlotElement(node){return !!(node&&node.getAttribute&&node.getAttribute("data-clippy-inline-media-slot")!==null)}function findInlineMediaSlot(start){for(var node=start;node&&node!==document.body;node=node.parentElement){if(isInlineMediaSlotElement(node))return node}return null}function readInlineMediaUrl(node){if(!node)return null;return node.getAttribute&&((node.getAttribute("data-clippy-inline-media-url")||node.getAttribute("data-url")||node.getAttribute("data_url")))||node.href||null}function stripHash(url){return String(url).replace(/#.*$/,"")}function urlsMatch(a,b){if(!a||!b)return false;try{return stripHash(new URL(a,loc).href)===stripHash(new URL(b,loc).href)}catch(_){return stripHash(a)===stripHash(b)}}function isFirstPartyReelUrl(value){try{var url=new URL(value,loc);if(url.protocol!=="https:")return false;var host=url.hostname.toLowerCase();var supported=host==="instagram.com"||host.endsWith(".instagram.com")||host==="facebook.com"||host.endsWith(".facebook.com");return supported&&/\/reels?\//i.test(url.pathname)}catch(_){return false}}function isInlineMediaUrlClick(node,href){var slot=findInlineMediaSlot(node);if(!slot)return false;var slotUrl=readInlineMediaUrl(slot);if(slotUrl)return urlsMatch(href,slotUrl);return isFirstPartyReelUrl(href)}function findDataHref(start){for(var node=start;node&&node!==document.body;node=node.parentElement){if(node.getAttribute){var href=node.getAttribute("data-href")||node.getAttribute("data-url");if(href)return{href:href,node:node}}}return null}var nativeOpen=window.open;window.open=function(url){if(parent!==window&&typeof url==="string"&&/^https?:\/\//.test(url)){parent.postMessage({type:"ecto:usercontent-link-click",href:url},"*");return null}return nativeOpen?nativeOpen.apply(window,arguments):null};document.addEventListener("click",function(e){var target=e.target instanceof Element?e.target:null;if(!target)return;if(parent===window)return;var a=target.closest?target.closest("a[href]"):null;if(a&&a.href&&/^https?:\/\//.test(a.href)&&a.href.replace(/#.*$/,"")!==loc){if(isInlineMediaUrlClick(a,a.href))return;var productId=extractProductId(target)||extractProductId(a);if(productId){e.preventDefault();parent.postMessage({type:"ecto-artifact-link-click",productId:productId},"*");return}e.preventDefault();parent.postMessage({type:"ecto:usercontent-link-click",href:a.href},"*");return}var dataHref=findDataHref(target);if(dataHref&&/^https?:\/\//.test(dataHref.href)&&dataHref.href.replace(/#.*$/,"")!==loc){if(isInlineMediaUrlClick(dataHref.node,dataHref.href))return;e.preventDefault();parent.postMessage({type:"ecto:usercontent-link-click",href:dataHref.href},"*")}},true)})();</script><script>(function(){var FOCUS_TYPE="ecto:artifact-focus-request";var CLOSE_TYPE="ecto:artifact-close-request";function focusArtifactDocument(){var body=document.body;if(!body)return;try{window.focus();}catch(e){}if(!body.hasAttribute("tabindex"))body.setAttribute("tabindex","-1");try{body.focus({preventScroll:true});}catch(e){try{body.focus();}catch(e2){}}}window.addEventListener("message",function(event){if(event.source!==window.parent)return;var data=event.data;if(!data||typeof data!=="object"||data.type!==FOCUS_TYPE)return;if(document.readyState==="loading"){document.addEventListener("DOMContentLoaded",focusArtifactDocument,{once:true});return;}focusArtifactDocument();});window.addEventListener("keydown",function(event){if(event.key!=="Escape")return;window.setTimeout(function(){if(event.defaultPrevented)return;window.parent.postMessage({type:CLOSE_TYPE},"*");},0);});})();</script></body>
 </html>
